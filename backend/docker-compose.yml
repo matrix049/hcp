@@ -1,0 +1,21 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: hcp_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: hcp
+      POSTGRES_PASSWORD: hcp_dev_password
+      POSTGRES_DB: hcp_survey
+    ports:
+      - "5432:5432"
+    volumes:
+      - hcp_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hcp -d hcp_survey"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  hcp_pgdata:

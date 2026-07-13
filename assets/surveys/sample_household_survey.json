@@ -1,0 +1,104 @@
+{
+  "id": "survey_household_2026",
+  "version": 2,
+  "title": {
+    "fr": "Enquête sur les ménages",
+    "ar": "استطلاع الأسر",
+    "en": "Household Survey"
+  },
+  "description": {
+    "fr": "Collecte de données socio-économiques auprès des ménages.",
+    "ar": "جمع البيانات الاجتماعية والاقتصادية من الأسر.",
+    "en": "Socio-economic data collection from households."
+  },
+  "locales": ["fr", "ar", "en"],
+  "pages": [
+    {
+      "id": "page_identification",
+      "title": { "fr": "Identification", "ar": "التعريف", "en": "Identification" },
+      "questions": [
+        {
+          "id": "q_region",
+          "type": "dropdown",
+          "label": { "fr": "Région", "ar": "الجهة", "en": "Region" },
+          "required": true,
+          "options": [
+            { "value": "casablanca_settat", "label": { "fr": "Casablanca-Settat", "ar": "الدار البيضاء-سطات", "en": "Casablanca-Settat" } },
+            { "value": "rabat_sale_kenitra", "label": { "fr": "Rabat-Salé-Kénitra", "ar": "الرباط-سلا-القنيطرة", "en": "Rabat-Salé-Kénitra" } },
+            { "value": "marrakech_safi", "label": { "fr": "Marrakech-Safi", "ar": "مراكش-آسفي", "en": "Marrakech-Safi" } }
+          ]
+        },
+        {
+          "id": "q_household_size",
+          "type": "number",
+          "label": { "fr": "Nombre de personnes dans le ménage", "ar": "عدد أفراد الأسرة", "en": "Number of people in the household" },
+          "required": true,
+          "validation": { "min": 1, "max": 30 },
+          "help": {
+            "fr": "Comptez toutes les personnes vivant habituellement dans le ménage, y compris les enfants et les personnes âgées.",
+            "ar": "احسب جميع الأشخاص الذين يعيشون عادة في الأسرة، بما في ذلك الأطفال وكبار السن."
+          }
+        },
+        {
+          "id": "q_visit_date",
+          "type": "date",
+          "label": { "fr": "Date de la visite", "ar": "تاريخ الزيارة", "en": "Visit date" },
+          "required": true
+        }
+      ]
+    },
+    {
+      "id": "page_economic",
+      "title": { "fr": "Situation économique", "ar": "الوضع الاقتصادي", "en": "Economic situation" },
+      "questions": [
+        {
+          "id": "q_has_income",
+          "type": "radio",
+          "label": { "fr": "Le ménage a-t-il un revenu régulier ?", "ar": "هل لدى الأسرة دخل منتظم؟", "en": "Does the household have a regular income?" },
+          "required": true,
+          "options": [
+            { "value": "yes", "label": { "fr": "Oui", "ar": "نعم", "en": "Yes" } },
+            { "value": "no", "label": { "fr": "Non", "ar": "لا", "en": "No" } }
+          ]
+        },
+        {
+          "id": "q_monthly_income",
+          "type": "number",
+          "label": { "fr": "Revenu mensuel (MAD)", "ar": "الدخل الشهري (درهم)", "en": "Monthly income (MAD)" },
+          "required": true,
+          "validation": { "min": 0 },
+          "visible_when": { "question": "q_has_income", "equals": "yes" },
+          "help": {
+            "fr": "Indiquez le revenu net mensuel total du ménage, toutes sources confondues.",
+            "ar": "أدخل صافي الدخل الشهري الإجمالي للأسرة من جميع المصادر."
+          }
+        },
+        {
+          "id": "q_income_sources",
+          "type": "checkbox",
+          "label": { "fr": "Sources de revenu", "ar": "مصادر الدخل", "en": "Income sources" },
+          "required": false,
+          "options": [
+            { "value": "salary", "label": { "fr": "Salaire", "ar": "أجر", "en": "Salary" } },
+            { "value": "agriculture", "label": { "fr": "Agriculture", "ar": "الفلاحة", "en": "Agriculture" } },
+            { "value": "commerce", "label": { "fr": "Commerce", "ar": "التجارة", "en": "Commerce" } },
+            { "value": "other", "label": { "fr": "Autre", "ar": "أخرى", "en": "Other" } }
+          ]
+        },
+        {
+          "id": "q_comments",
+          "type": "text",
+          "label": { "fr": "Observations de l'enquêteur", "ar": "ملاحظات الباحث", "en": "Agent observations" },
+          "required": false,
+          "multiline": true
+        },
+        {
+          "id": "q_gps",
+          "type": "gps",
+          "label": { "fr": "Localisation du logement (à venir)", "ar": "موقع المسكن (قريباً)", "en": "Dwelling location (future)" },
+          "required": false
+        }
+      ]
+    }
+  ]
+}

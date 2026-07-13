@@ -1,0 +1,121 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../../core/settings/locale_controller.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../../auth/presentation/providers/auth_state.dart';
+
+/// Shows the signed-in agent's details and a sign-out action.
+class ProfilePage extends ConsumerWidget {
+  const ProfilePage({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(authControllerProvider);
+    final agent = state is AuthAuthenticated ? state.agent : null;
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Profile')),
+      body: agent == null
+          ? const Center(child: Text('Not signed in'))
+          : ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                Center(
+                  child: Column(
+                    children: [
+                      CircleAvatar(
+                        radius: 40,
+                        child: Text(
+                          agent.firstName.isNotEmpty ? agent.firstName[0] : '?',
+                          style: const TextStyle(fontSize: 32),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        agent.fullName,
+                        style: Theme.of(context).textTheme.headlineSmall,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                _InfoTile(icon: Icons.badge_outlined, label: 'Matricule', value: agent.matricule),
+                _InfoTile(icon: Icons.work_outline, label: 'Role', value: agent.role),
+                _InfoTile(icon: Icons.map_outlined, label: 'Region', value: agent.region),
+                if (agent.phone != null && agent.phone!.isNotEmpty)
+                  _InfoTile(icon: Icons.phone_outlined, label: 'Phone', value: agent.phone!),
+                const SizedBox(height: 24),
+                const _LanguageSelector(),
+                const SizedBox(height: 24),
+                FilledButton.tonalIcon(
+                  icon: const Icon(Icons.logout),
+                  label: const Text('Sign out'),
+                  onPressed: () async {
+                    await ref.read(authControllerProvider.notifier).logout();
+                    if (context.mounted) {
+                      // Return to the root (AuthGate), which now shows login.
+                      Navigator.of(context).popUntil((route) => route.isFirst);
+                    }
+                  },
+                ),
+              ],
+            ),
+    );
+  }
+}
+
+/// FR / AR language selector, persisted via [LocaleController].
+class _LanguageSelector extends ConsumerWidget {
+  const _LanguageSelector();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final current = ref.watch(localeControllerProvider);
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: Icon(Icons.language),
+              title: Text('Language'),
+              subtitle: Text('اللغة'),
+            ),
+            SegmentedButton<AppLanguage>(
+              segments: const [
+                ButtonSegment(value: AppLanguage.fr, label: Text('Français')),
+                ButtonSegment(value: AppLanguage.ar, label: Text('العربية')),
+              ],
+              selected: {current},
+              onSelectionChanged: (selection) => ref
+                  .read(localeControllerProvider.notifier)
+                  .setLanguage(selection.first),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _InfoTile extends StatelessWidget {
+  const _InfoTile({required this.icon, required this.label, required this.value});
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: ListTile(
+        leading: Icon(icon),
+        title: Text(label),
+        subtitle: Text(value),
+      ),
+    );
+  }
+}

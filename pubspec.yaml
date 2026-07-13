@@ -1,0 +1,71 @@
+name: hcp_survey_app
+description: "HCP offline-first survey application for field agents across Morocco."
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: '>=3.4.0 <4.0.0'
+  flutter: ">=3.22.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # --- Localization (FR/AR) + RTL support ---
+  flutter_localizations:
+    sdk: flutter
+
+  # --- Local app preferences (selected language) ---
+  shared_preferences: ^2.3.2
+
+  # --- State management ---
+  flutter_riverpod: ^2.6.1
+
+  # --- Local database (offline-first single source of truth) ---
+  drift: ^2.20.0
+  drift_flutter: ^0.2.0          # opens the SQLite DB with sane defaults
+  sqlite3_flutter_libs: ^0.5.24  # bundles the native SQLite engine
+  path_provider: ^2.1.4
+  path: ^1.9.0
+
+  # --- Networking / REST ---
+  dio: ^5.7.0
+
+  # --- Secure token storage (JWT) ---
+  flutter_secure_storage: ^9.2.2
+
+  # --- Connectivity (drives auto-sync) ---
+  connectivity_plus: ^6.0.5
+
+  # --- Routing ---
+  go_router: ^14.2.7
+
+  # --- Models / serialization (dynamic surveys) ---
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
+
+  # --- Functional error handling across layers ---
+  dartz: ^0.10.1
+
+  # --- Password hashing for offline login (salted SHA-256) ---
+  crypto: ^3.0.5
+
+  # --- Utilities ---
+  intl: ^0.20.2
+  uuid: ^4.5.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+  # --- Code generation ---
+  build_runner: ^2.4.13
+  freezed: ^2.5.7
+  json_serializable: ^6.8.0
+  drift_dev: ^2.20.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/surveys/

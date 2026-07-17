@@ -76,6 +76,7 @@ class _QuestionnaireFormState extends ConsumerState<_QuestionnaireForm> {
   late final String _responseId;
   late final String _agentId;
   bool _loading = true;
+  bool _readOnly = false;
 
   @override
   void initState() {
@@ -93,7 +94,12 @@ class _QuestionnaireFormState extends ConsumerState<_QuestionnaireForm> {
       final existing = await ref
           .read(responseRepositoryProvider)
           .getResponse(widget.responseId!);
-      if (existing != null) _answers.addAll(existing.answers);
+      if (existing != null) {
+        _answers.addAll(existing.answers);
+        // Lock-after-sync: a response already accepted by the server opens
+        // read-only until the agent explicitly chooses to make a correction.
+        _readOnly = existing.status == SyncStatus.synced;
+      }
     }
     if (mounted) setState(() => _loading = false);
   }
@@ -194,27 +200,78 @@ class _QuestionnaireFormState extends ConsumerState<_QuestionnaireForm> {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
+        if (_readOnly) ...[
+          _buildLockedBanner(),
+          const SizedBox(height: 16),
+        ],
         Text(
           localizedText(widget.survey.title, locale: locale),
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         const SizedBox(height: 16),
-        for (final page in widget.survey.pages) ..._buildPage(page, locale),
-        const SizedBox(height: 24),
-        OutlinedButton.icon(
-          onPressed: _onSaveDraftPressed,
-          icon: const Icon(Icons.save_outlined),
-          label: const Text('Save draft'),
-        ),
-        const SizedBox(height: 8),
-        FilledButton(
-          onPressed: _finalize,
-          child: const Padding(
-            padding: EdgeInsets.symmetric(vertical: 12),
-            child: Text('Validate & mark ready to sync'),
+        // A synced response is shown read-only; wrapping the questions in an
+        // AbsorbPointer disables all input without touching the per-question
+        // widgets. "Make a correction" flips _readOnly and re-enables editing.
+        AbsorbPointer(
+          absorbing: _readOnly,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (final page in widget.survey.pages) ..._buildPage(page, locale),
+            ],
           ),
         ),
+        const SizedBox(height: 24),
+        ..._buildActions(),
       ],
+    );
+  }
+
+  /// Bottom actions depend on whether the response is locked (synced).
+  List<Widget> _buildActions() {
+    if (_readOnly) {
+      return [
+        FilledButton.tonalIcon(
+          onPressed: () => setState(() => _readOnly = false),
+          icon: const Icon(Icons.edit_outlined),
+          label: const Text('Make a correction'),
+        ),
+      ];
+    }
+    return [
+      OutlinedButton.icon(
+        onPressed: _onSaveDraftPressed,
+        icon: const Icon(Icons.save_outlined),
+        label: const Text('Save draft'),
+      ),
+      const SizedBox(height: 8),
+      FilledButton(
+        onPressed: _finalize,
+        child: const Padding(
+          padding: EdgeInsets.symmetric(vertical: 12),
+          child: Text('Validate & mark ready to sync'),
+        ),
+      ),
+    ];
+  }
+
+  Widget _buildLockedBanner() {
+    return const Card(
+      child: Padding(
+        padding: EdgeInsets.all(12),
+        child: Row(
+          children: [
+            Icon(Icons.lock_outline),
+            SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'This response is already submitted to the server, so it is '
+                'read-only. Tap “Make a correction” to edit and re-sync it.',
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

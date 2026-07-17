@@ -1,0 +1,11 @@
+1. Quel est le nom du chef de ménage ?
+2. Combien de personnes vivent dans le ménage ?
+3. Date de la visite
+4. Le ménage a-t-il un revenu régulier ? (Oui / Non)
+5. Région (Casablanca-Settat / Rabat-Salé-Kénitra / Marrakech-Safi / Fès-Meknès)
+6. Sources de revenu, plusieurs choix possibles : Salaire / Agriculture / Commerce / Autre
+7. Quel est le revenu mensuel du ménage ?
+8. Le logement est-il raccordé à l'électricité ? (Oui / Non)
+9. Niveau d'éducation du chef de ménage (Aucun / Primaire / Secondaire / Supérieur)
+10. Localisation GPS du logement
+11. Observations de l'enquêteur

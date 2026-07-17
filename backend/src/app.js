@@ -1,10 +1,16 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import cors from 'cors';
 import express from 'express';
 
 import { errorHandler, notFound } from './middleware/errorHandler.js';
+import adminRoutes from './modules/admin/admin.routes.js';
 import authRoutes from './modules/auth/auth.routes.js';
 import responseRoutes from './modules/responses/responses.routes.js';
 import surveyRoutes from './modules/surveys/surveys.routes.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export function createApp() {
   const app = express();
@@ -25,6 +31,10 @@ export function createApp() {
   app.use('/api/auth', authRoutes);
   app.use('/api/surveys', surveyRoutes);
   app.use('/api/responses', responseRoutes);
+  app.use('/api/admin', adminRoutes);
+
+  // Admin web tool (survey generator) — served at /admin
+  app.use('/admin', express.static(path.join(__dirname, '../public/admin')));
 
   app.use(notFound);
   app.use(errorHandler);

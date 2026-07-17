@@ -22,4 +22,8 @@ export const env = {
     accessExpires: process.env.JWT_ACCESS_EXPIRES ?? '1h',
     refreshExpires: process.env.JWT_REFRESH_EXPIRES ?? '30d',
   },
+  admin: {
+    email: process.env.ADMIN_EMAIL ?? 'hcp@admin.com',
+    password: process.env.ADMIN_PASSWORD ?? 'password123',
+  },
 };

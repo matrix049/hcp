@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HCP — Administration</title>
+  <style>
+    :root { --brand: #0B6E4F; }
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; background: #f4f6f5; color: #1a1a1a; }
+    header { background: var(--brand); color: #fff; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
+    header h1 { margin: 0; font-size: 20px; }
+    header .who { font-size: 13px; opacity: .9; }
+    header .who button { background: rgba(255,255,255,.2); color: #fff; border: 0; border-radius: 6px; padding: 6px 12px; margin-left: 10px; cursor: pointer; }
+    nav { display: flex; gap: 4px; padding: 0 16px; background: #095c42; }
+    nav button { background: transparent; color: #cfe6dd; border: 0; padding: 12px 18px; font-size: 14px; cursor: pointer; border-bottom: 3px solid transparent; }
+    nav button.active { color: #fff; border-bottom-color: #fff; font-weight: 600; }
+    main { max-width: 1100px; margin: 20px auto; padding: 0 16px; }
+    .tab { display: none; }
+    .tab.active { display: block; }
+    .card { background: #fff; border: 1px solid #e2e6e4; border-radius: 10px; padding: 18px; margin-bottom: 16px; }
+    .card h2 { margin: 0 0 12px; font-size: 15px; }
+    label { display: block; font-size: 13px; font-weight: 600; margin: 10px 0 4px; }
+    input, select { width: 100%; padding: 8px; border: 1px solid #ccd; border-radius: 6px; }
+    button.act { background: var(--brand); color: #fff; border: 0; border-radius: 6px; padding: 9px 15px; font-size: 14px; cursor: pointer; margin-top: 12px; }
+    button.mini { padding: 4px 10px; font-size: 12px; margin: 0; }
+    button.grey { background: #667; }
+    pre { background: #0f1720; color: #d7e0e8; padding: 12px; border-radius: 8px; overflow: auto; max-height: 300px; font-size: 12px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; padding: 8px; border-bottom: 1px solid #eef; }
+    th { color: #556; font-weight: 600; }
+    .q { border-left: 3px solid var(--brand); padding: 6px 10px; margin: 6px 0; background: #fafbfb; border-radius: 4px; }
+    .q .type { font-size: 11px; background: #e7f2ee; color: var(--brand); padding: 1px 8px; border-radius: 10px; margin-left: 6px; }
+    .q .opts { font-size: 12px; color: #556; margin-top: 3px; }
+    .status { font-size: 13px; margin-top: 10px; min-height: 18px; }
+    .status.ok { color: var(--brand); } .status.err { color: #c0392b; }
+    small.hint { color: #667; font-size: 12px; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .badge { font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+    .badge.on { background: #e7f2ee; color: var(--brand); } .badge.off { background: #fdecea; color: #c0392b; }
+    /* login */
+    #login { position: fixed; inset: 0; background: #eef2f0; display: flex; align-items: center; justify-content: center; z-index: 50; }
+    #login .box { background: #fff; border-radius: 12px; padding: 28px; width: 340px; box-shadow: 0 8px 30px rgba(0,0,0,.12); }
+    #login h2 { margin: 0 0 4px; color: var(--brand); }
+    #login p { margin: 0 0 16px; font-size: 13px; color: #667; }
+    #app { display: none; }
+  </style>
+</head>
+<body>
+  <!-- ============ LOGIN ============ -->
+  <div id="login">
+    <div class="box">
+      <h2>Administration HCP</h2>
+      <p>Connectez-vous pour gérer les enquêtes et les enquêteurs.</p>
+      <label>Email</label><input id="l_email" type="email" placeholder="hcp@admin.com" />
+      <label>Mot de passe</label><input id="l_password" type="password" placeholder="••••••••" />
+      <button id="loginBtn" class="act" style="width:100%">Se connecter</button>
+      <div id="loginStatus" class="status"></div>
+    </div>
+  </div>
+
+  <!-- ============ APP ============ -->
+  <div id="app">
+    <header>
+      <h1>Administration — HCP Survey</h1>
+      <div class="who"><span id="whoEmail"></span><button id="logoutBtn">Déconnexion</button></div>
+    </header>
+    <nav>
+      <button data-tab="gen" class="active">Générer une enquête</button>
+      <button data-tab="surveys">Enquêtes</button>
+      <button data-tab="agents">Enquêteurs</button>
+    </nav>
+
+    <main>
+      <!-- TAB: GENERATE -->
+      <section id="tab-gen" class="tab active">
+        <div class="grid2">
+          <div class="card">
+            <h2>1 · Importer &amp; générer</h2>
+            <label for="title">Titre de l'enquête</label>
+            <input id="title" type="text" placeholder="Ex : Enquête sur les ménages 2026" />
+            <label for="file">Fichier de questions (.docx / .txt)</label>
+            <input id="file" type="file" accept=".docx,.txt,.md,.csv" />
+            <small class="hint">Une question par ligne. « 1. », « Q1: » sont retirés automatiquement.</small>
+            <br><button id="genBtn" class="act">Générer l'enquête</button>
+            <div id="genStatus" class="status"></div>
+          </div>
+          <div class="card">
+            <h2>2 · Aperçu</h2>
+            <div id="preview"><small class="hint">L'aperçu s'affichera ici.</small></div>
+          </div>
+        </div>
+        <div class="card">
+          <h2>3 · JSON &amp; publication</h2>
+          <pre id="json">—</pre>
+          <button id="pubBtn" class="act grey" disabled>Publier l'enquête</button>
+          <div id="pubStatus" class="status"></div>
+        </div>
+      </section>
+
+      <!-- TAB: SURVEYS -->
+      <section id="tab-surveys" class="tab">
+        <div class="card">
+          <h2>Enquêtes publiées</h2>
+          <table><thead><tr><th>Titre</th><th>ID</th><th>Version</th><th>État</th><th></th></tr></thead>
+            <tbody id="surveyRows"></tbody></table>
+          <button id="reloadSurveys" class="act mini" style="margin-top:14px">Rafraîchir</button>
+        </div>
+      </section>
+
+      <!-- TAB: AGENTS -->
+      <section id="tab-agents" class="tab">
+        <div class="grid2">
+          <div class="card">
+            <h2 id="agentFormTitle">Nouvel enquêteur</h2>
+            <input type="hidden" id="agentId" />
+            <label>Matricule</label><input id="a_matricule" />
+            <label>Prénom</label><input id="a_first" />
+            <label>Nom</label><input id="a_last" />
+            <label>Rôle</label>
+            <select id="a_role"><option value="agent">agent</option><option value="supervisor">supervisor</option><option value="admin">admin</option></select>
+            <label>Région</label><input id="a_region" />
+            <label>Téléphone</label><input id="a_phone" />
+            <label>Mot de passe <small class="hint">(vide en édition = inchangé)</small></label>
+            <input id="a_password" type="text" />
+            <br><button id="saveAgent" class="act">Enregistrer</button>
+            <button id="resetAgent" class="act grey mini" type="button">Nouveau</button>
+            <div id="agentStatus" class="status"></div>
+          </div>
+          <div class="card">
+            <h2>Enquêteurs</h2>
+            <table><thead><tr><th>Matricule</th><th>Nom</th><th>Rôle</th><th>Région</th><th></th></tr></thead>
+              <tbody id="agentRows"></tbody></table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const setStatus = (id, msg, cls) => { const e = $(id); e.textContent = msg; e.className = 'status ' + (cls || ''); };
+    const TOKEN_KEY = 'hcp_admin_token';
+    const getToken = () => localStorage.getItem(TOKEN_KEY);
+
+    // fetch wrapper that attaches the admin token and logs out on 401/403.
+    async function api(path, opts = {}) {
+      const headers = Object.assign({}, opts.headers, { Authorization: 'Bearer ' + getToken() });
+      const res = await fetch(path, Object.assign({}, opts, { headers }));
+      if (res.status === 401 || res.status === 403) { logout(); throw new Error('Session expirée. Reconnectez-vous.'); }
+      return res;
+    }
+
+    function showApp(email) { $('login').style.display = 'none'; $('app').style.display = 'block'; $('whoEmail').textContent = email || ''; }
+    function showLogin() { $('app').style.display = 'none'; $('login').style.display = 'flex'; }
+    function logout() { localStorage.removeItem(TOKEN_KEY); showLogin(); }
+
+    // On load: if we have a token, verify it; else show login.
+    (async () => {
+      if (!getToken()) return showLogin();
+      try { const me = await (await api('/api/admin/me')).json(); showApp(me.email); }
+      catch { showLogin(); }
+    })();
+
+    // ---- Login ----
+    $('loginBtn').addEventListener('click', doLogin);
+    $('l_password').addEventListener('keydown', (e) => { if (e.key === 'Enter') doLogin(); });
+    async function doLogin() {
+      setStatus('loginStatus', 'Connexion…', '');
+      try {
+        const res = await fetch('/api/admin/login', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: $('l_email').value.trim(), password: $('l_password').value }) });
+        const data = await res.json(); if (!res.ok) throw new Error(data.error);
+        localStorage.setItem(TOKEN_KEY, data.token);
+        setStatus('loginStatus', '', '');
+        showApp(data.email);
+      } catch (e) { setStatus('loginStatus', '✗ ' + e.message, 'err'); }
+    }
+    $('logoutBtn').addEventListener('click', logout);
+
+    // ---- Tabs ----
+    document.querySelectorAll('nav button').forEach((b) => b.addEventListener('click', () => {
+      document.querySelectorAll('nav button').forEach((x) => x.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach((x) => x.classList.remove('active'));
+      b.classList.add('active'); $('tab-' + b.dataset.tab).classList.add('active');
+      if (b.dataset.tab === 'surveys') loadSurveys();
+      if (b.dataset.tab === 'agents') loadAgents();
+    }));
+
+    // ---- Generate ----
+    let currentSurvey = null;
+    $('genBtn').addEventListener('click', async () => {
+      const file = $('file').files[0];
+      if (!file) return setStatus('genStatus', 'Choisissez un fichier.', 'err');
+      setStatus('genStatus', 'Génération…', ''); $('genBtn').disabled = true;
+      try {
+        const fd = new FormData(); fd.append('file', file); fd.append('title', $('title').value);
+        const res = await api('/api/admin/surveys/generate', { method: 'POST', body: fd });
+        const data = await res.json(); if (!res.ok) throw new Error(data.error);
+        currentSurvey = data.survey;
+        const qs = data.survey.pages.flatMap((p) => p.questions);
+        $('preview').innerHTML = qs.map((q) => `<div class="q"><b>${q.label.fr}</b><span class="type">${q.type}</span>${q.options ? `<div class="opts">${q.options.map(o=>o.label.fr).join(' · ')}</div>` : ''}</div>`).join('');
+        $('json').textContent = JSON.stringify(data.survey, null, 2);
+        $('pubBtn').disabled = false;
+        setStatus('genStatus', `✓ ${data.questionCount} questions générées.`, 'ok');
+      } catch (e) { setStatus('genStatus', '✗ ' + e.message, 'err'); } finally { $('genBtn').disabled = false; }
+    });
+    $('pubBtn').addEventListener('click', async () => {
+      if (!currentSurvey) return; setStatus('pubStatus', 'Publication…', ''); $('pubBtn').disabled = true;
+      try {
+        const res = await api('/api/admin/surveys/publish', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(currentSurvey) });
+        const data = await res.json(); if (!res.ok) throw new Error(data.error);
+        setStatus('pubStatus', `✓ Publiée : « ${data.title} ».`, 'ok');
+      } catch (e) { setStatus('pubStatus', '✗ ' + e.message, 'err'); } finally { $('pubBtn').disabled = false; }
+    });
+
+    // ---- Surveys management ----
+    async function loadSurveys() {
+      const rows = await (await api('/api/admin/surveys')).json();
+      $('surveyRows').innerHTML = rows.length ? rows.map((s) => `
+        <tr><td>${s.title}</td><td><small class="hint">${s.id}</small></td><td>${s.version}</td>
+        <td><span class="badge ${s.isActive ? 'on' : 'off'}">${s.isActive ? 'Active' : 'Masquée'}</span></td>
+        <td><button class="act mini ${s.isActive ? 'grey' : ''}" onclick="toggleSurvey('${s.id}', ${!s.isActive})">${s.isActive ? 'Masquer' : 'Activer'}</button></td></tr>`).join('')
+        : '<tr><td colspan="5"><small class="hint">Aucune enquête.</small></td></tr>';
+    }
+    window.toggleSurvey = async (id, isActive) => {
+      await api(`/api/admin/surveys/${id}/active`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ isActive }) });
+      loadSurveys();
+    };
+    $('reloadSurveys').addEventListener('click', loadSurveys);
+
+    // ---- Agents management ----
+    async function loadAgents() {
+      const rows = await (await api('/api/admin/agents')).json();
+      $('agentRows').innerHTML = rows.length ? rows.map((a) => `
+        <tr><td>${a.matricule}</td><td>${a.firstName} ${a.lastName}</td><td>${a.role}</td><td>${a.region}</td>
+        <td><button class="act mini grey" onclick='editAgent(${JSON.stringify(a)})'>Éditer</button></td></tr>`).join('')
+        : '<tr><td colspan="5"><small class="hint">Aucun enquêteur.</small></td></tr>';
+    }
+    window.editAgent = (a) => {
+      $('agentFormTitle').textContent = 'Éditer : ' + a.matricule;
+      $('agentId').value = a.id; $('a_matricule').value = a.matricule; $('a_matricule').disabled = true;
+      $('a_first').value = a.firstName; $('a_last').value = a.lastName; $('a_role').value = a.role;
+      $('a_region').value = a.region; $('a_phone').value = a.phone || ''; $('a_password').value = '';
+    };
+    $('resetAgent').addEventListener('click', () => {
+      $('agentFormTitle').textContent = 'Nouvel enquêteur';
+      ['agentId','a_matricule','a_first','a_last','a_region','a_phone','a_password'].forEach((k)=>$(k).value='');
+      $('a_matricule').disabled = false; $('a_role').value = 'agent'; setStatus('agentStatus','','');
+    });
+    $('saveAgent').addEventListener('click', async () => {
+      const id = $('agentId').value;
+      const body = { matricule: $('a_matricule').value, firstName: $('a_first').value, lastName: $('a_last').value,
+        role: $('a_role').value, region: $('a_region').value, phone: $('a_phone').value, password: $('a_password').value };
+      setStatus('agentStatus', 'Enregistrement…', '');
+      try {
+        const res = id
+          ? await api(`/api/admin/agents/${id}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+          : await api('/api/admin/agents', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+        const data = await res.json(); if (!res.ok) throw new Error(data.error);
+        setStatus('agentStatus', '✓ Enregistré.', 'ok');
+        $('resetAgent').click(); loadAgents();
+      } catch (e) { setStatus('agentStatus', '✗ ' + e.message, 'err'); }
+    });
+  </script>
+</body>
+</html>

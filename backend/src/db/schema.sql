@@ -10,7 +10,11 @@ CREATE TABLE IF NOT EXISTS agents (
     matricule     VARCHAR(50)  UNIQUE NOT NULL,
     first_name    VARCHAR(100) NOT NULL,
     last_name     VARCHAR(100) NOT NULL,
-    role          VARCHAR(50)  NOT NULL DEFAULT 'agent',
+    -- Two roles only: `agent` collects in the mobile app, `admin` uses the web
+    -- tool. The constraint stops a typo from creating an account in a role
+    -- nothing checks for.
+    role          VARCHAR(50)  NOT NULL DEFAULT 'agent'
+                  CHECK (role IN ('agent', 'admin')),
     region        VARCHAR(100) NOT NULL,
     phone         VARCHAR(30),
     password_hash VARCHAR(255) NOT NULL,

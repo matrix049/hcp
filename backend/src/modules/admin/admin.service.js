@@ -285,6 +285,20 @@ export async function setSurveyActive(id, isActive) {
 
 // ===================== AGENT MANAGEMENT =====================
 
+/**
+ * The only two roles the system has.
+ *
+ * `agent` collects responses in the mobile app; `admin` uses this web tool.
+ * Anything else was silently accepted before and stored as-is, which meant a
+ * typo produced an account belonging to a role nothing checks for.
+ */
+export const AGENT_ROLES = ['agent', 'admin'];
+
+/** Falls back to `agent` rather than trusting whatever the form sent. */
+function normalizeRole(role) {
+  return AGENT_ROLES.includes(role) ? role : 'agent';
+}
+
 /** All agents (no password hash). */
 export async function listAgents() {
   const { rows } = await query(
@@ -309,7 +323,7 @@ export async function createAgent(a) {
   const { rows } = await query(
     `INSERT INTO agents (matricule, first_name, last_name, role, region, phone, password_hash)
      VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id`,
-    [a.matricule, a.firstName, a.lastName, a.role || 'agent', a.region, a.phone || null, hash],
+    [a.matricule, a.firstName, a.lastName, normalizeRole(a.role), a.region, a.phone || null, hash],
   );
   return { id: rows[0].id };
 }
@@ -322,7 +336,7 @@ export async function updateAgent(id, a) {
         first_name = $2, last_name = $3, role = $4, region = $5, phone = $6,
         password_hash = COALESCE($7, password_hash)
       WHERE id = $1`,
-    [id, a.firstName, a.lastName, a.role || 'agent', a.region, a.phone || null, hash],
+    [id, a.firstName, a.lastName, normalizeRole(a.role), a.region, a.phone || null, hash],
   );
   return rowCount > 0;
 }

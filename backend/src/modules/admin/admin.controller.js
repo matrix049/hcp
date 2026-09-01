@@ -12,6 +12,7 @@ import {
   updateAgent,
 } from './admin.service.js';
 import { fixQuestionWithLlm, llmStatus } from './llm/index.js';
+import { buildSurveyExport, toCsv, getStats } from './export.service.js';
 
 // ---- Auth ----
 export function loginController(req, res) {
@@ -241,6 +242,65 @@ export async function setSurveyActiveController(req, res, next) {
     if (!ok) return res.status(404).json({ error: 'Survey not found.' });
     res.json({ updated: true });
   } catch (err) { next(err); }
+}
+
+// ---- Data export & dashboard ----
+
+/**
+ * GET /api/admin/surveys/:id/export.csv
+ *
+ * One row per response, one column per question. Query params:
+ *   locale=fr|ar     which language for headers and option labels
+ *   delimiter=comma  plain comma instead of the Excel-friendly semicolon
+ *   bom=0            drop the UTF-8 BOM (for tools that dislike it)
+ */
+export async function exportSurveyController(req, res, next) {
+  try {
+    const locale = req.query.locale === 'ar' ? 'ar' : 'fr';
+    const table = await buildSurveyExport(req.params.id, { locale });
+    if (!table) return res.status(404).json({ error: 'Enquête introuvable.' });
+
+    const csv = toCsv(table, {
+      delimiter: req.query.delimiter === 'comma' ? ',' : ';',
+      bom: req.query.bom !== '0',
+    });
+
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="${table.filename}"`);
+    // Let the browser read the filename when the panel fetches this with JS.
+    res.setHeader('Access-Control-Expose-Headers', 'Content-Disposition');
+    res.send(csv);
+  } catch (err) {
+    next(err);
+  }
+}
+
+/** GET /api/admin/surveys/:id/export/preview — first rows, for the panel. */
+export async function exportPreviewController(req, res, next) {
+  try {
+    const table = await buildSurveyExport(req.params.id, {
+      locale: req.query.locale === 'ar' ? 'ar' : 'fr',
+    });
+    if (!table) return res.status(404).json({ error: 'Enquête introuvable.' });
+    res.json({
+      filename: table.filename,
+      columns: table.columns,
+      totalRows: table.rows.length,
+      rows: table.rows.slice(0, 8),
+    });
+  } catch (err) {
+    next(err);
+  }
+}
+
+/** GET /api/admin/stats — everything the dashboard needs, in one call. */
+export async function statsController(req, res, next) {
+  try {
+    const days = Math.min(90, Math.max(7, Number(req.query.days) || 14));
+    res.json(await getStats({ days }));
+  } catch (err) {
+    next(err);
+  }
 }
 
 // ---- Agent management ----

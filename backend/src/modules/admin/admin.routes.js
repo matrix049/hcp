@@ -12,6 +12,9 @@ import {
   llmStatusController,
   publishController,
   listSurveysController,
+  exportSurveyController,
+  exportPreviewController,
+  statsController,
   setSurveyActiveController,
   listAgentsController,
   createAgentController,
@@ -43,6 +46,11 @@ router.post('/surveys/fix-question', fixQuestionController);
 router.post('/surveys/publish', publishController);
 router.get('/surveys', listSurveysController);
 router.post('/surveys/:id/active', setSurveyActiveController);
+
+// Data export + dashboard
+router.get('/stats', statsController);
+router.get('/surveys/:id/export.csv', exportSurveyController);
+router.get('/surveys/:id/export/preview', exportPreviewController);
 
 // Agent management
 router.get('/agents', listAgentsController);

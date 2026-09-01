@@ -5,7 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>HCP — Administration</title>
   <style>
-    :root { --brand: #0B6E4F; }
+    :root { --brand: #0B6E4F;
+            /* Chart series hue. The brand green fails the chroma floor as a
+               data mark (it reads gray in a bar); this is the same family,
+               validated against the light surface. */
+            --series: #0E8A5F; }
     * { box-sizing: border-box; }
     body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; margin: 0; background: #f4f6f5; color: #1a1a1a; }
     header { background: var(--brand); color: #fff; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
@@ -111,6 +115,40 @@
     .aibox { margin: 9px 0 0 31px; display: none; gap: 6px; }
     .aibox.open { display: flex; }
     .aibox input { font-size: 13px; }
+    /* ---- dashboard ---- */
+    .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
+    .kpi { background: #fff; border: 1px solid #e2e6e4; border-radius: 10px; padding: 16px 18px; }
+    .kpi .n { font-size: 30px; font-weight: 700; color: #14352a; line-height: 1.1;
+              font-variant-numeric: tabular-nums; }
+    .kpi .k { font-size: 12px; color: #6a7a73; margin-top: 4px; }
+    .kpi .n.small { font-size: 17px; font-weight: 600; }
+
+    /* Single series, so one hue and no legend - the title names it. */
+    .chart { display: flex; align-items: flex-end; gap: 2px; height: 150px; margin-top: 6px;
+             border-bottom: 1px solid #e6ebe9; padding-bottom: 0; }
+    .chart .col { flex: 1; display: flex; flex-direction: column; justify-content: flex-end;
+                  align-items: center; height: 100%; position: relative; cursor: default; }
+    .chart .bar { width: 100%; background: var(--series); border-radius: 4px 4px 0 0; min-height: 2px; }
+    .chart .col.zero .bar { background: #e6ebe9; }
+    .chart .col:hover .bar { filter: brightness(1.08); }
+    .chart .tip { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+                  background: #14352a; color: #fff; font-size: 11px; padding: 4px 8px;
+                  border-radius: 5px; white-space: nowrap; margin-bottom: 6px; display: none;
+                  pointer-events: none; z-index: 5; }
+    .chart .col:hover .tip { display: block; }
+    .xaxis { display: flex; gap: 2px; margin-top: 6px; }
+    .xaxis span { flex: 1; text-align: center; font-size: 10px; color: #8a9a94;
+                  overflow: hidden; white-space: nowrap; }
+    .dashgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .exp { border: 1px solid #d4dedb; background: #fff; border-radius: 6px; padding: 4px 10px;
+           font-size: 12px; cursor: pointer; color: #33534a; white-space: nowrap; }
+    .exp:hover { border-color: var(--brand); color: var(--brand); }
+    .exp:disabled { opacity: .45; cursor: default; }
+    .csvprev { overflow-x: auto; margin-top: 10px; }
+    .csvprev table { font-size: 11px; white-space: nowrap; }
+    .csvprev th { position: sticky; top: 0; background: #f4f8f6; }
+
     .steps { margin: 0 0 10px; padding-left: 20px; font-size: 13px; color: #445; line-height: 1.7; }
     .askbar { display: flex; align-items: center; gap: 9px; flex-wrap: wrap;
               padding: 13px 22px; border-top: 1px solid #e2e6e4; background: #f7fbf9; }
@@ -152,12 +190,44 @@
       <div class="who"><span id="whoEmail"></span><button id="logoutBtn">Déconnexion</button></div>
     </header>
     <nav>
+      <button data-tab="dash">Tableau de bord</button>
       <button data-tab="gen" class="active">Générer une enquête</button>
       <button data-tab="surveys">Enquêtes</button>
       <button data-tab="agents">Enquêteurs</button>
     </nav>
 
     <main>
+      <!-- TAB: DASHBOARD -->
+      <section id="tab-dash" class="tab">
+        <div class="kpis" id="kpis"></div>
+
+        <div class="card" style="margin-top:16px">
+          <h2>Réponses synchronisées par jour <span id="chartRange" class="hint"></span></h2>
+          <div class="chart" id="chart"></div>
+          <div class="xaxis" id="xaxis"></div>
+        </div>
+
+        <div class="dashgrid">
+          <div class="card">
+            <h2>Par enquête</h2>
+            <table><thead><tr><th>Enquête</th><th class="num">Réponses</th><th></th></tr></thead>
+              <tbody id="dashSurveys"></tbody></table>
+          </div>
+          <div class="card">
+            <h2>Par enquêteur</h2>
+            <table><thead><tr><th>Matricule</th><th>Nom</th><th>Région</th><th class="num">Réponses</th></tr></thead>
+              <tbody id="dashAgents"></tbody></table>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Aperçu de l'export</h2>
+          <small class="hint">Le fichier CSV s'ouvre directement dans Excel (encodage UTF-8 avec BOM,
+          separateur point-virgule) : une ligne par reponse, une colonne par question.</small>
+          <div id="csvPreview"><small class="hint">Cliquez « Exporter » sur une enquête pour voir un aperçu.</small></div>
+        </div>
+      </section>
+
       <!-- TAB: GENERATE -->
       <section id="tab-gen" class="tab active">
         <div class="grid2">
@@ -306,7 +376,88 @@
       b.classList.add('active'); $('tab-' + b.dataset.tab).classList.add('active');
       if (b.dataset.tab === 'surveys') loadSurveys();
       if (b.dataset.tab === 'agents') loadAgents();
+      if (b.dataset.tab === 'dash') loadDashboard();
     }));
+
+    // ---- Dashboard ----
+    const nf = new Intl.NumberFormat('fr-FR');
+    const dateFr = (iso) => (iso
+      ? new Date(iso).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+      : '—');
+
+    async function loadDashboard() {
+      const d = await (await api('/api/admin/stats?days=14')).json();
+
+      // Headline numbers are stat tiles, not a chart - there is nothing to compare.
+      $('kpis').innerHTML = [
+        ['n', nf.format(d.totals.responses), 'réponses collectées'],
+        ['n', nf.format(d.totals.activeSurveys) + ' / ' + nf.format(d.totals.surveys), 'enquêtes actives'],
+        ['n', nf.format(d.totals.agents), 'enquêteurs'],
+        ['n small', dateFr(d.lastSync), 'dernière synchronisation'],
+      ].map(([cls, n, k]) => '<div class="kpi"><div class="' + cls + '">' + n + '</div><div class="k">' + k + '</div></div>').join('');
+
+      renderDailyChart(d.daily);
+
+      $('dashSurveys').innerHTML = d.perSurvey.length
+        ? d.perSurvey.map((r) => '<tr><td>' + r.title +
+            (r.isActive ? '' : ' <span class="badge off">Masquée</span>') +
+            '</td><td class="num">' + nf.format(r.responses) + '</td>' +
+            '<td><button class="exp" ' + (r.responses ? '' : 'disabled') +
+            ' onclick="exportSurvey(\'' + r.id + '\')">Exporter</button></td></tr>').join('')
+        : '<tr><td colspan="3"><small class="hint">Aucune enquête.</small></td></tr>';
+
+      $('dashAgents').innerHTML = d.perAgent.length
+        ? d.perAgent.map((a) => '<tr><td>' + a.matricule + '</td><td>' + a.name +
+            '</td><td>' + (a.region || '—') + '</td><td class="num">' + nf.format(a.responses) + '</td></tr>').join('')
+        : '<tr><td colspan="4"><small class="hint">Aucun enquêteur.</small></td></tr>';
+    }
+
+    function renderDailyChart(daily) {
+      const max = Math.max(1, ...daily.map((d) => d.responses));
+      $('chartRange').textContent = '· ' + daily.length + ' derniers jours · ' +
+        nf.format(daily.reduce((s, d) => s + d.responses, 0)) + ' au total';
+
+      $('chart').innerHTML = daily.map((d) => {
+        const pct = (d.responses / max) * 100;
+        const day = new Date(d.day + 'T00:00:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+        return '<div class="col' + (d.responses ? '' : ' zero') + '">' +
+          '<div class="tip">' + d.responses + ' réponse' + (d.responses > 1 ? 's' : '') + ' · ' + day + '</div>' +
+          '<div class="bar" style="height:' + (d.responses ? Math.max(pct, 3) : 2) + '%"></div></div>';
+      }).join('');
+
+      // Label only the ends and every third day - a number under every bar is noise.
+      $('xaxis').innerHTML = daily.map((d, i) => {
+        const show = i === 0 || i === daily.length - 1 || i % 3 === 0;
+        return '<span>' + (show ? d.day.slice(8) + '/' + d.day.slice(5, 7) : '') + '</span>';
+      }).join('');
+    }
+
+    /** Download the CSV, and show the first rows so the admin sees what it holds. */
+    window.exportSurvey = async (id) => {
+      try {
+        const res = await api('/api/admin/surveys/' + id + '/export.csv');
+        if (!res.ok) throw new Error('Export impossible');
+        const blob = await res.blob();
+        const disp = res.headers.get('Content-Disposition') || '';
+        const name = (disp.match(/filename="([^"]+)"/) || [, id + '.csv'])[1];
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = name; document.body.appendChild(a); a.click();
+        a.remove(); URL.revokeObjectURL(url);
+
+        const p = await (await api('/api/admin/surveys/' + id + '/export/preview')).json();
+        $('csvPreview').innerHTML =
+          '<small class="hint">' + name + ' · ' + nf.format(p.totalRows) + ' ligne(s) · ' +
+          p.columns.length + ' colonne(s). Aperçu des ' + Math.min(8, p.totalRows) + ' premières :</small>' +
+          '<div class="csvprev"><table><thead><tr>' +
+          p.columns.map((c) => '<th>' + c + '</th>').join('') + '</tr></thead><tbody>' +
+          p.rows.map((r) => '<tr>' + r.map((c) => '<td>' + (c === '' ? '—' : c) + '</td>').join('') + '</tr>').join('') +
+          '</tbody></table></div>';
+      } catch (e) {
+        $('csvPreview').innerHTML = '<span class="status err">✗ ' + e.message + '</span>';
+      }
+    };
 
     // ---- Generate (streamed) ----
     let currentSurvey = null;
@@ -708,7 +859,8 @@
       $('surveyRows').innerHTML = rows.length ? rows.map((s) => `
         <tr><td>${s.title}</td><td><small class="hint">${s.id}</small></td><td>${s.version}</td>
         <td><span class="badge ${s.isActive ? 'on' : 'off'}">${s.isActive ? 'Active' : 'Masquée'}</span></td>
-        <td><button class="act mini ${s.isActive ? 'grey' : ''}" onclick="toggleSurvey('${s.id}', ${!s.isActive})">${s.isActive ? 'Masquer' : 'Activer'}</button></td></tr>`).join('')
+        <td><button class="act mini ${s.isActive ? 'grey' : ''}" onclick="toggleSurvey('${s.id}', ${!s.isActive})">${s.isActive ? 'Masquer' : 'Activer'}</button>
+        <button class="exp" style="margin-left:6px" onclick="exportSurvey('${s.id}')">Exporter CSV</button></td></tr>`).join('')
         : '<tr><td colspan="5"><small class="hint">Aucune enquête.</small></td></tr>';
     }
     window.toggleSurvey = async (id, isActive) => {

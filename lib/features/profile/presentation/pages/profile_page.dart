@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/settings/locale_controller.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../auth/presentation/providers/auth_state.dart';
 
@@ -45,6 +46,8 @@ class ProfilePage extends ConsumerWidget {
                 if (agent.phone != null && agent.phone!.isNotEmpty)
                   _InfoTile(icon: Icons.phone_outlined, label: 'Phone', value: agent.phone!),
                 const SizedBox(height: 24),
+                const _LanguageSelector(),
+                const SizedBox(height: 24),
                 FilledButton.tonalIcon(
                   icon: const Icon(Icons.logout),
                   label: const Text('Sign out'),
@@ -58,6 +61,59 @@ class ProfilePage extends ConsumerWidget {
                 ),
               ],
             ),
+    );
+  }
+}
+
+/// Switches the app between French and Arabic.
+///
+/// Surveys carry both languages (the generator fills `label.fr` and `label.ar`),
+/// but without this control the app stayed on its French default and the Arabic
+/// half was invisible. Changing it also flips the whole app to RTL, because
+/// `MaterialApp.locale` follows the same provider.
+class _LanguageSelector extends ConsumerWidget {
+  const _LanguageSelector();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final current = ref.watch(localeControllerProvider);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.translate),
+                const SizedBox(width: 12),
+                Text(
+                  'Langue / اللغة',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            SegmentedButton<AppLanguage>(
+              segments: const [
+                ButtonSegment(
+                  value: AppLanguage.fr,
+                  label: Text('Français'),
+                ),
+                ButtonSegment(
+                  value: AppLanguage.ar,
+                  label: Text('العربية'),
+                ),
+              ],
+              selected: {current},
+              onSelectionChanged: (selection) => ref
+                  .read(localeControllerProvider.notifier)
+                  .setLanguage(selection.first),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

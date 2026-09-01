@@ -2,8 +2,8 @@ import { env } from '../../config/env.js';
 import { signAccessToken } from '../../utils/jwt.js';
 import {
   extractText,
-  splitIntoQuestions,
-  generateSurvey,
+  extractQuestionLines,
+  generateSurveyFromText,
   publishSurvey,
   listAllSurveys,
   setSurveyActive,
@@ -11,6 +11,7 @@ import {
   createAgent,
   updateAgent,
 } from './admin.service.js';
+import { fixQuestionWithLlm, llmStatus } from './llm/index.js';
 
 // ---- Auth ----
 export function loginController(req, res) {
@@ -27,8 +28,20 @@ export function meController(req, res) {
 }
 
 /**
+ * GET /api/admin/llm/status
+ * Which engines are configured — lets the panel warn before an upload.
+ */
+export function llmStatusController(req, res) {
+  res.json(llmStatus());
+}
+
+/**
  * POST /api/admin/surveys/generate  (multipart: file, [title])
- * Runs the pipeline and returns a preview survey JSON (NOT yet saved).
+ * Runs the pipeline and returns a PREVIEW survey (NOT saved).
+ *
+ * `engine` and `quality` travel with the result so the review screen can tell
+ * the admin which tier produced it — silent fallback is how a weak survey
+ * reaches every field agent.
  */
 export async function generateController(req, res, next) {
   try {
@@ -36,15 +49,163 @@ export async function generateController(req, res, next) {
       return res.status(400).json({ error: 'No file uploaded (field "file").' });
     }
     const text = await extractText(req.file);
-    const questions = splitIntoQuestions(text);
-    if (questions.length === 0) {
-      return res.status(400).json({ error: 'No questions found in the file.' });
-    }
-    const survey = generateSurvey(questions, {
+    const result = await generateSurveyFromText(text, {
       title: req.body.title?.trim() || undefined,
-      stamp: Date.now(),
+      lines: await extractQuestionLines(req.file),
     });
-    res.json({ questionCount: questions.length, survey });
+    res.json({
+      questionCount: result.definition.pages[0].questions.length,
+      engine: result.engine,
+      quality: result.quality,
+      repairs: result.repairs,
+      attempts: result.attempts,
+      sourceText: text,
+      survey: result.definition,
+    });
+  } catch (err) {
+    if (err.status === 400) return res.status(400).json({ error: err.message });
+    next(err);
+  }
+}
+
+/**
+ * POST /api/admin/surveys/generate-stream  (multipart: file, [title])
+ *
+ * Same pipeline as /generate, but reports progress over Server-Sent Events so
+ * the admin sees each question appear instead of a frozen spinner. On a busy
+ * free tier a document can take minutes, and silence reads as a crash.
+ *
+ * Events: `progress` (repeatedly), then exactly one `done` or `error`.
+ */
+export async function generateStreamController(req, res) {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream; charset=utf-8',
+    'Cache-Control': 'no-cache, no-transform',
+    Connection: 'keep-alive',
+    // Proxies that buffer would defeat the whole point of streaming.
+    'X-Accel-Buffering': 'no',
+  });
+
+  const send = (event, data) => {
+    res.write(`event: ${event}
+data: ${JSON.stringify(data)}
+
+`);
+  };
+
+  // If the admin closes the tab mid-generation, stop writing to a dead socket.
+  // Watch the RESPONSE, not the request: `req` emits 'close' as soon as multer
+  // has consumed the uploaded body, which would silence progress immediately.
+  let aborted = false;
+  res.on('close', () => { aborted = true; });
+
+  try {
+    if (!req.file) {
+      send('error', { error: 'No file uploaded (field "file").' });
+      return res.end();
+    }
+    send('progress', { phase: 'extracting', file: req.file.originalname });
+
+    const text = await extractText(req.file);
+    send('progress', { phase: 'extracted', chars: text.length });
+
+    const result = await generateSurveyFromText(text, {
+      title: req.body.title?.trim() || undefined,
+      lines: await extractQuestionLines(req.file),
+      onProgress: (p) => { if (!aborted) send('progress', p); },
+    });
+
+    if (aborted) return res.end();
+    send('done', {
+      questionCount: result.definition.pages[0].questions.length,
+      engine: result.engine,
+      quality: result.quality,
+      repairs: result.repairs,
+      attempts: result.attempts,
+      sourceText: text,
+      survey: result.definition,
+    });
+  } catch (err) {
+    // The response is already streaming, so an error is an SSE event, not a
+    // status code — the client has long since received 200 OK.
+    if (!aborted) send('error', { error: err.message });
+  } finally {
+    res.end();
+  }
+}
+
+/**
+ * POST /api/admin/surveys/regenerate-stream   (json)
+ * Body: { sourceText, title?, instructions }
+ *
+ * Re-runs the whole document through the LLM with extra admin instructions
+ * ("mets les revenus en tranches", "toutes les questions facultatives sauf
+ * l'identification"). The file is not re-uploaded - the first generation
+ * returned its extracted text, so corrections are cheap to iterate on.
+ */
+export async function regenerateStreamController(req, res) {
+  res.writeHead(200, {
+    'Content-Type': 'text/event-stream; charset=utf-8',
+    'Cache-Control': 'no-cache, no-transform',
+    Connection: 'keep-alive',
+    'X-Accel-Buffering': 'no',
+  });
+  const send = (event, data) => {
+    res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
+  };
+  let aborted = false;
+  res.on('close', () => { aborted = true; });
+
+  try {
+    const { sourceText, title, instructions } = req.body || {};
+    if (!sourceText?.trim()) {
+      send('error', { error: 'Texte source manquant. Relancez une génération depuis le fichier.' });
+      return res.end();
+    }
+    if (!instructions?.trim()) {
+      send('error', { error: 'Écrivez une consigne pour l’IA.' });
+      return res.end();
+    }
+
+    const result = await generateSurveyFromText(sourceText, {
+      title: title?.trim() || undefined,
+      instructions: instructions.trim(),
+      onProgress: (p) => { if (!aborted) send('progress', p); },
+    });
+
+    if (aborted) return res.end();
+    send('done', {
+      questionCount: result.definition.pages[0].questions.length,
+      engine: result.engine,
+      quality: result.quality,
+      repairs: result.repairs,
+      attempts: result.attempts,
+      sourceText,
+      survey: result.definition,
+    });
+  } catch (err) {
+    if (!aborted) send('error', { error: err.message });
+  } finally {
+    res.end();
+  }
+}
+
+/**
+ * POST /api/admin/surveys/fix-question
+ * Body: { question, instruction, sourceText? }
+ * Re-generates ONE question from an admin instruction on the review screen.
+ */
+export async function fixQuestionController(req, res, next) {
+  try {
+    const { question, instruction, sourceText } = req.body || {};
+    if (!question?.id || !instruction?.trim()) {
+      return res.status(400).json({ error: 'question and instruction are required.' });
+    }
+    const result = await fixQuestionWithLlm(question, instruction.trim(), sourceText);
+    if (!result.question) {
+      return res.status(503).json({ error: 'Aucun moteur IA disponible.', attempts: result.attempts });
+    }
+    res.json({ question: result.question, engine: result.engine });
   } catch (err) {
     next(err);
   }

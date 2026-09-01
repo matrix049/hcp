@@ -44,6 +44,92 @@
     #login h2 { margin: 0 0 4px; color: var(--brand); }
     #login p { margin: 0 0 16px; font-size: 13px; color: #667; }
     #app { display: none; }
+    /* generation progress */
+    #progress { display: none; margin-top: 14px; }
+    .bar { height: 8px; background: #e6ebe9; border-radius: 99px; overflow: hidden; }
+    .bar > i { display: block; height: 100%; width: 0; background: var(--brand); border-radius: 99px;
+               transition: width .35s ease; }
+    .bar.indeterminate > i { width: 40%; animation: slide 1.2s ease-in-out infinite; }
+    @keyframes slide { 0% { margin-left: -40%; } 100% { margin-left: 100%; } }
+    #progHead { display: flex; justify-content: space-between; align-items: baseline;
+                font-size: 13px; margin-bottom: 6px; }
+    #progHead b { color: var(--brand); }
+    #progNow { font-size: 12px; color: #556; margin-top: 6px; min-height: 16px;
+               white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #progLog { margin-top: 8px; max-height: 132px; overflow-y: auto; font-size: 12px;
+               border-top: 1px solid #eef; padding-top: 6px; }
+    #progLog div { padding: 2px 0; color: #556; }
+    #progLog div.warn { color: #b9770e; }
+    #progLog div.done { color: var(--brand); font-weight: 600; }
+    .engine { font-size: 11px; padding: 2px 8px; border-radius: 10px; background: #e7f2ee;
+              color: var(--brand); margin-left: 6px; }
+    .engine.fallback { background: #fdf3e3; color: #b9770e; }
+    textarea { width: 100%; padding: 8px; border: 1px solid #ccd; border-radius: 6px;
+               font-family: inherit; font-size: 13px; resize: vertical; }
+
+    /* ---- survey preview: looks like the real form, not a debug dump ---- */
+    #previewCard { padding: 0; overflow: hidden; }
+    .formhead { display: flex; justify-content: space-between; align-items: flex-start;
+                gap: 16px; padding: 18px 22px; border-bottom: 1px solid #e2e6e4;
+                background: linear-gradient(#fbfdfc, #f4f8f6); }
+    .titleInput { font-size: 19px; font-weight: 700; border: 1px solid transparent;
+                  background: transparent; padding: 4px 6px; width: 100%; color: #14352a; }
+    .titleInput:enabled:hover { border-color: #d8e2de; background: #fff; }
+    .titleInput:focus { border-color: var(--brand); background: #fff; outline: none; }
+    .ar { font-size: 14px; color: #5a6b64; direction: rtl; text-align: right; padding: 0 6px; }
+    #preview { padding: 6px 22px 4px; }
+    #preview:empty::after { content: 'L’aperçu de l’enquête s’affichera ici.';
+                            color: #889; font-size: 13px; display: block; padding: 18px 0; }
+    .qcard { border: 1px solid #e6ebe9; border-radius: 10px; padding: 14px 16px; margin: 14px 0;
+             background: #fff; }
+    .qcard:hover { border-color: #cfe0d9; }
+    .qtop { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+    .qnum { color: #8a9a94; font-size: 12px; font-weight: 700; min-width: 26px; }
+    .qlabel { font-size: 14px; font-weight: 600; color: #1c2a25; border: 1px solid transparent;
+              border-radius: 5px; padding: 2px 5px; width: 100%; font-family: inherit; }
+    .qlabel:hover { border-color: #dbe5e1; } .qlabel:focus { border-color: var(--brand); outline: none; }
+    .req { color: #c0392b; margin-left: 3px; font-weight: 700; }
+    .qhelp { font-size: 12px; color: #6a7a73; font-style: italic; margin: 4px 0 0 31px; }
+    .qbody { margin: 10px 0 0 31px; }
+    .qbody input[type=text], .qbody input[type=number], .qbody input[type=date],
+    .qbody select, .qbody textarea { max-width: 420px; background: #fcfdfd; }
+    .opt { display: flex; align-items: center; gap: 8px; margin: 5px 0; font-size: 13px; }
+    .opt input[type=radio], .opt input[type=checkbox] { width: auto; }
+    .opt .del { border: 0; background: transparent; color: #c0392b; cursor: pointer;
+                font-size: 15px; padding: 0 4px; visibility: hidden; }
+    .opt:hover .del { visibility: visible; }
+    .qtools { display: flex; gap: 6px; align-items: center; flex-wrap: wrap;
+              margin: 10px 0 0 31px; padding-top: 9px; border-top: 1px dashed #e8eeec; }
+    .qtools select { width: auto; font-size: 12px; padding: 4px 6px; }
+    .qtools label.chk { display: flex; align-items: center; gap: 5px; font-size: 12px;
+                        font-weight: 500; margin: 0; cursor: pointer; }
+    .qtools label.chk input { width: auto; }
+    .tinybtn { border: 1px solid #d4dedb; background: #fff; border-radius: 6px; padding: 4px 9px;
+               font-size: 12px; cursor: pointer; color: #33534a; }
+    .tinybtn:hover { border-color: var(--brand); color: var(--brand); }
+    .tinybtn.danger:hover { border-color: #c0392b; color: #c0392b; }
+    .aibox { margin: 9px 0 0 31px; display: none; gap: 6px; }
+    .aibox.open { display: flex; }
+    .aibox input { font-size: 13px; }
+    .steps { margin: 0 0 10px; padding-left: 20px; font-size: 13px; color: #445; line-height: 1.7; }
+    .askbar { display: flex; align-items: center; gap: 9px; flex-wrap: wrap;
+              padding: 13px 22px; border-top: 1px solid #e2e6e4; background: #f7fbf9; }
+    .asklabel { font-size: 13px; font-weight: 600; color: #33534a; white-space: nowrap; }
+    .askbar select { width: auto; max-width: 230px; font-size: 12px; padding: 6px; }
+    .askbar input { flex: 1; min-width: 220px; font-size: 13px; }
+    .askbar .status { margin: 0; flex-basis: 100%; }
+    .pubrow { display: flex; align-items: center; gap: 14px; padding: 14px 22px;
+              border-top: 1px solid #e2e6e4; background: #fafbfb; }
+    .pubrow .status { margin: 0; }
+    #jsonBox { border-top: 1px solid #e2e6e4; padding: 10px 22px 16px; }
+    #jsonBox summary { cursor: pointer; font-size: 12px; color: #667; }
+    #jsonBox pre { margin-top: 10px; }
+
+    /* A fallback survey is materially weaker - this must not be a subtle chip. */
+    .banner { padding: 11px 16px; font-size: 13px; display: flex; gap: 9px; align-items: flex-start; }
+    .banner.warn { background: #fdf3e3; color: #8a5b08; border-bottom: 1px solid #f0dfc0; }
+    .banner.ok { background: #e9f5f0; color: #14603f; border-bottom: 1px solid #cfe6dd; }
+    .banner b { display: block; margin-bottom: 2px; }
   </style>
 </head>
 <body>
@@ -84,17 +170,52 @@
             <small class="hint">Une question par ligne. « 1. », « Q1: » sont retirés automatiquement.</small>
             <br><button id="genBtn" class="act">Générer l'enquête</button>
             <div id="genStatus" class="status"></div>
+            <div id="progress">
+              <div id="progHead"><span id="progPhase">Préparation…</span><b id="progCount"></b></div>
+              <div class="bar indeterminate" id="progBar"><i></i></div>
+              <div id="progNow"></div>
+              <div id="progLog"></div>
+            </div>
           </div>
           <div class="card">
-            <h2>2 · Aperçu</h2>
-            <div id="preview"><small class="hint">L'aperçu s'affichera ici.</small></div>
+            <h2>2 · Comment ça marche</h2>
+            <ol class="steps">
+              <li>Importez le document Word ou texte.</li>
+              <li>L'IA lit chaque question et propose son type, ses options et sa traduction arabe.</li>
+              <li>Relisez l'aperçu ci-dessous, corrigez à la main ou demandez à l'IA.</li>
+              <li>Publiez : l'enquête devient téléchargeable par les enquêteurs.</li>
+            </ol>
+            <small class="hint">Les documents longs sont découpés en lots de 25 questions
+            et le nombre est vérifié à chaque lot, pour qu'aucune question ne disparaisse.</small>
           </div>
         </div>
-        <div class="card">
-          <h2>3 · JSON &amp; publication</h2>
-          <pre id="json">—</pre>
-          <button id="pubBtn" class="act grey" disabled>Publier l'enquête</button>
-          <div id="pubStatus" class="status"></div>
+
+        <!-- The survey as the surveyor will actually see it, still unpublished. -->
+        <div class="card" id="previewCard">
+          <div id="engineBanner"></div>
+          <div class="formhead">
+            <div>
+              <input id="previewTitle" class="titleInput" placeholder="Titre de l'enquete" disabled />
+              <div id="previewTitleAr" class="ar"></div>
+            </div>
+            <div id="previewMeta"><small class="hint">Aucune enquête générée pour le moment.</small></div>
+          </div>
+          <div id="preview"></div>
+          <div class="askbar">
+            <span class="asklabel">✨ Demander à l'IA :</span>
+            <select id="askScope"><option value="all">toute l'enquête</option></select>
+            <input id="askText" type="text" placeholder="Ex : mets le revenu en tranches plutôt qu'un nombre" />
+            <button id="askBtn" class="tinybtn" disabled>Envoyer</button>
+            <span id="regenStatus" class="status"></span>
+          </div>
+          <div class="pubrow">
+            <button id="pubBtn" class="act" disabled>Publier l'enquête</button>
+            <span id="pubStatus" class="status"></span>
+          </div>
+          <details id="jsonBox">
+            <summary>Voir le JSON envoyé à l'application</summary>
+            <pre id="json">—</pre>
+          </details>
         </div>
       </section>
 
@@ -187,24 +308,391 @@
       if (b.dataset.tab === 'agents') loadAgents();
     }));
 
-    // ---- Generate ----
+    // ---- Generate (streamed) ----
     let currentSurvey = null;
+    let currentSourceText = '';
+
+    const logLine = (msg, cls) => {
+      const d = document.createElement('div');
+      d.textContent = msg; if (cls) d.className = cls;
+      $('progLog').appendChild(d); $('progLog').scrollTop = $('progLog').scrollHeight;
+    };
+
+    // How many questions to expect. Unknown until the model finishes, so the
+    // bar sweeps until the first question lands, then tracks a real ratio.
+    let expected = 0;
+    let estimatedQuestions = 0;
+
+    function resetProgress() {
+      $('progress').style.display = 'block';
+      $('progLog').innerHTML = '';
+      $('progNow').textContent = '';
+      $('progCount').textContent = '';
+      $('progPhase').textContent = 'Preparation...';
+      $('progBar').classList.add('indeterminate');
+      $('progBar').firstElementChild.style.width = '0';
+      expected = 0;
+    }
+
+    function onProgressEvent(p) {
+      if (p.phase === 'extracting') { $('progPhase').textContent = 'Lecture du document...'; return; }
+      if (p.phase === 'extracted') {
+        $('progPhase').textContent = 'Document lu';
+        logLine('Document lu - ' + p.chars + ' caracteres.');
+        return;
+      }
+      if (p.phase === 'provider') { logLine('Moteur : ' + p.provider); return; }
+      if (p.phase === 'batch') {
+        $('progPhase').textContent = 'Lot ' + p.index + '/' + p.total + '...';
+        logLine('Lot ' + p.index + '/' + p.total + ' (' + p.size + ' questions)');
+        return;
+      }
+      if (p.phase === 'calling') {
+        $('progPhase').textContent = "Analyse par l'IA...";
+        logLine('Appel du modele ' + p.model + (p.attempt > 1 ? ' (tentative ' + p.attempt + ')' : '') + '...');
+        return;
+      }
+      if (p.phase === 'waiting') {
+        $('progPhase').textContent = 'Attente du quota gratuit...';
+        logLine('~ ' + p.reason + ' - reprise dans ' + p.seconds + 's.', 'warn');
+        return;
+      }
+      if (p.phase === 'giving_up') {
+        $('progPhase').textContent = 'Bascule sur les regles par mots-cles';
+        logLine('! IA indisponible (' + p.reason + ') - generation sans IA.', 'warn');
+        return;
+      }
+      if (p.phase === 'retry') { logLine('~ ' + p.model + ' : ' + p.reason + ' - nouvelle tentative.', 'warn'); return; }
+      if (p.phase === 'failed') { logLine('x ' + p.provider + ' indisponible (' + p.kind + ').', 'warn'); return; }
+      if (p.phase === 'generating') {
+        if (!expected) {
+          expected = Math.max(p.questions, estimatedQuestions || p.questions);
+          $('progBar').classList.remove('indeterminate');
+        }
+        expected = Math.max(expected, p.questions);
+        $('progPhase').textContent = 'Generation des questions...';
+        $('progCount').textContent = p.questions + ' question' + (p.questions > 1 ? 's' : '');
+        $('progBar').firstElementChild.style.width = Math.min(97, (p.questions / expected) * 100) + '%';
+        if (p.label) $('progNow').textContent = '-> ' + p.label;
+      }
+    }
+
+    // Rough expectation read from the file itself, so the bar is meaningful
+    // from the first question instead of jumping around.
+    $('file').addEventListener('change', async () => {
+      estimatedQuestions = 0;
+      const f = $('file').files[0];
+      if (f && /\.(txt|md|csv)$/i.test(f.name)) {
+        const t = await f.text();
+        estimatedQuestions = t.split(/\r?\n/).filter((l) => l.trim().length > 3).length;
+      }
+    });
+
+    /**
+     * Read one SSE response to completion. Written by hand rather than with
+     * EventSource, which cannot POST (neither the file upload nor the JSON
+     * instructions could travel on it).
+     */
+    async function consumeStream(res, startedAt) {
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let finished = false;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        // Tolerate CRLF as well as LF, in case a proxy rewrites line endings.
+        const frames = buffer.split(/\r?\n\r?\n/);
+        buffer = frames.pop();
+
+        for (const frame of frames) {
+          const lines = frame.split(/\r?\n/);
+          const evLine = lines.find((l) => l.startsWith('event:'));
+          const dataLine = lines.find((l) => l.startsWith('data:'));
+          if (!evLine || !dataLine) continue;
+          const event = evLine.slice(6).trim();
+          const data = JSON.parse(dataLine.slice(5).trim());
+
+          if (event === 'progress') onProgressEvent(data);
+          else if (event === 'error') { finished = true; throw new Error(data.error); }
+          else if (event === 'done') { finished = true; renderResult(data, startedAt); }
+        }
+        if (finished) break;
+      }
+      if (!finished) throw new Error('Connexion interrompue avant la fin.');
+    }
+
     $('genBtn').addEventListener('click', async () => {
       const file = $('file').files[0];
       if (!file) return setStatus('genStatus', 'Choisissez un fichier.', 'err');
-      setStatus('genStatus', 'Génération…', ''); $('genBtn').disabled = true;
+      setStatus('genStatus', '', ''); $('genBtn').disabled = true; $('pubBtn').disabled = true;
+      resetProgress();
+      const startedAt = Date.now();
+
       try {
         const fd = new FormData(); fd.append('file', file); fd.append('title', $('title').value);
-        const res = await api('/api/admin/surveys/generate', { method: 'POST', body: fd });
-        const data = await res.json(); if (!res.ok) throw new Error(data.error);
-        currentSurvey = data.survey;
-        const qs = data.survey.pages.flatMap((p) => p.questions);
-        $('preview').innerHTML = qs.map((q) => `<div class="q"><b>${q.label.fr}</b><span class="type">${q.type}</span>${q.options ? `<div class="opts">${q.options.map(o=>o.label.fr).join(' · ')}</div>` : ''}</div>`).join('');
-        $('json').textContent = JSON.stringify(data.survey, null, 2);
-        $('pubBtn').disabled = false;
-        setStatus('genStatus', `✓ ${data.questionCount} questions générées.`, 'ok');
-      } catch (e) { setStatus('genStatus', '✗ ' + e.message, 'err'); } finally { $('genBtn').disabled = false; }
+        const res = await api('/api/admin/surveys/generate-stream', { method: 'POST', body: fd });
+        if (!res.ok) throw new Error('Erreur serveur (' + res.status + ')');
+
+        await consumeStream(res, startedAt);
+      } catch (e) {
+        $('progBar').classList.remove('indeterminate');
+        logLine('x ' + e.message, 'warn');
+        setStatus('genStatus', 'x ' + e.message, 'err');
+      } finally { $('genBtn').disabled = false; }
     });
+
+    // ---------------------------------------------------------------- preview
+    const TYPES = [
+      ['text', 'Texte libre'], ['number', 'Nombre'], ['date', 'Date'],
+      ['radio', 'Choix unique'], ['dropdown', 'Liste deroulante'], ['checkbox', 'Choix multiples'],
+    ];
+    const CHOICE = ['radio', 'dropdown', 'checkbox'];
+    const el = (tag, props = {}, kids = []) => {
+      const n = Object.assign(document.createElement(tag), props);
+      kids.forEach((k) => n.appendChild(k));
+      return n;
+    };
+
+    function allQuestions() {
+      return currentSurvey ? currentSurvey.pages.flatMap((p) => p.questions) : [];
+    }
+
+    function syncJson() {
+      $('json').textContent = currentSurvey ? JSON.stringify(currentSurvey, null, 2) : '—';
+    }
+
+    /** The answer widget, drawn exactly as the surveyor will meet it. */
+    function fieldFor(q) {
+      if (q.type === 'text') {
+        return q.multiline
+          ? el('textarea', { rows: 3, placeholder: 'Reponse libre…', disabled: true })
+          : el('input', { type: 'text', placeholder: 'Reponse…', disabled: true });
+      }
+      if (q.type === 'number') {
+        const v = q.validation || {};
+        const hint = v.min !== undefined || v.max !== undefined
+          ? ' (' + (v.min ?? '') + ' – ' + (v.max ?? '') + ')' : '';
+        return el('input', { type: 'number', placeholder: 'Nombre' + hint, disabled: true });
+      }
+      if (q.type === 'date') return el('input', { type: 'date', disabled: true });
+
+      if (q.type === 'dropdown') {
+        const sel = el('select', { disabled: true });
+        sel.appendChild(el('option', { textContent: 'Choisir…' }));
+        (q.options || []).forEach((o) => sel.appendChild(el('option', { textContent: o.label.fr })));
+        return sel;
+      }
+
+      // radio / checkbox: real inputs, so "one answer" vs "several" is obvious
+      const box = el('div');
+      (q.options || []).forEach((o, i) => {
+        const input = el('input', { type: q.type === 'checkbox' ? 'checkbox' : 'radio', name: q.id, disabled: true });
+        const del = el('button', { className: 'del', title: 'Supprimer cette option', textContent: '×' });
+        del.onclick = () => {
+          q.options.splice(i, 1);
+          if (q.options.length < 2) q.type = 'text';
+          renderPreview();
+        };
+        const label = el('span', { textContent: o.label.fr });
+        const ar = o.label.ar ? el('span', { className: 'ar', textContent: o.label.ar, style: 'flex:1' }) : null;
+        const row = el('div', { className: 'opt' }, ar ? [input, label, ar, del] : [input, label, del]);
+        box.appendChild(row);
+      });
+      const add = el('button', { className: 'tinybtn', textContent: '+ option' });
+      add.onclick = () => {
+        const name = prompt('Libellé de la nouvelle option ?');
+        if (!name) return;
+        q.options = q.options || [];
+        q.options.push({ value: name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, ''), label: { fr: name, ar: '' } });
+        renderPreview();
+      };
+      box.appendChild(add);
+      return box;
+    }
+
+    function questionCard(q, index) {
+      const num = el('span', { className: 'qnum', textContent: (index + 1) + '.' });
+
+      const label = el('input', { className: 'qlabel', value: q.label.fr });
+      label.oninput = () => { q.label.fr = label.value; syncJson(); };
+      const star = el('span', { className: 'req', textContent: q.required ? '*' : '' });
+
+      const top = el('div', { className: 'qtop' }, [
+        el('div', { style: 'display:flex;align-items:center;flex:1;gap:2px' }, [num, label, star]),
+      ]);
+
+      const card = el('div', { className: 'qcard' }, [top]);
+      if (q.label.ar) card.appendChild(el('div', { className: 'ar', textContent: q.label.ar }));
+      if (q.help?.fr) card.appendChild(el('div', { className: 'qhelp', textContent: 'ℹ ' + q.help.fr }));
+      card.appendChild(el('div', { className: 'qbody' }, [fieldFor(q)]));
+
+      // ---- tools: type, required, AI, delete ----
+      const typeSel = el('select');
+      TYPES.forEach(([v, txt]) => typeSel.appendChild(el('option', { value: v, textContent: txt, selected: v === q.type })));
+      typeSel.onchange = () => {
+        q.type = typeSel.value;
+        if (CHOICE.includes(q.type) && (!q.options || q.options.length < 2)) {
+          q.options = [
+            { value: 'oui', label: { fr: 'Oui', ar: 'نعم' } },
+            { value: 'non', label: { fr: 'Non', ar: 'لا' } },
+          ];
+        }
+        if (!CHOICE.includes(q.type)) delete q.options;
+        renderPreview();
+      };
+
+      const reqBox = el('input', { type: 'checkbox', checked: q.required });
+      reqBox.onchange = () => { q.required = reqBox.checked; renderPreview(); };
+      const reqLabel = el('label', { className: 'chk' }, [reqBox, el('span', { textContent: 'Obligatoire' })]);
+
+      const delBtn = el('button', { className: 'tinybtn danger', textContent: 'Supprimer' });
+      delBtn.onclick = () => {
+        if (!confirm('Supprimer la question « ' + q.label.fr + ' » ?')) return;
+        for (const page of currentSurvey.pages) {
+          const i = page.questions.indexOf(q);
+          if (i !== -1) page.questions.splice(i, 1);
+        }
+        renderPreview();
+      };
+
+      // One AI box for the whole screen (the bar under the preview); this just
+      // aims it at this question, so there is a single place to type.
+      const aiBtn = el('button', { className: 'tinybtn', textContent: '✨ IA' });
+      aiBtn.onclick = () => {
+        $('askScope').value = q.id;
+        $('askText').focus();
+        card.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      };
+
+      card.appendChild(el('div', { className: 'qtools' }, [typeSel, reqLabel, aiBtn, delBtn]));
+
+      return card;
+    }
+
+    function renderPreview() {
+      const host = $('preview');
+      host.innerHTML = '';
+      const qs = allQuestions();
+      qs.forEach((q, i) => {
+        q.id = 'q_' + (i + 1); // keep ids contiguous after edits/deletions
+        host.appendChild(questionCard(q, i));
+      });
+      const scope = $('askScope');
+      const keep = scope.value;
+      scope.innerHTML = '';
+      scope.appendChild(el('option', { value: 'all', textContent: "toute l'enquête" }));
+      qs.forEach((q, i) => scope.appendChild(el('option', {
+        value: q.id,
+        textContent: 'Q' + (i + 1) + ' · ' + q.label.fr.slice(0, 40),
+      })));
+      scope.value = qs.some((q) => q.id === keep) ? keep : 'all';
+      $('askBtn').disabled = false;
+
+      $('previewMeta').innerHTML = qs.length
+        ? '<small class="hint">' + qs.length + ' questions · ' +
+          qs.filter((q) => q.required).length + ' obligatoires</small>'
+        : '<small class="hint">Aucune question.</small>';
+      syncJson();
+    }
+
+    function renderResult(data, startedAt) {
+      currentSurvey = data.survey;
+      currentSourceText = data.sourceText || '';
+      const secs = ((Date.now() - startedAt) / 1000).toFixed(1);
+
+      $('progBar').classList.remove('indeterminate');
+      $('progBar').firstElementChild.style.width = '100%';
+      $('progPhase').textContent = 'Termine';
+      $('progNow').textContent = '';
+      logLine('OK - ' + data.questionCount + ' questions en ' + secs + 's via ' + data.engine + '.', 'done');
+      (data.repairs || []).forEach((r) => logLine('! ' + r, 'warn'));
+
+      // Which engine produced this is not a detail: the keyword fallback is a
+      // markedly weaker survey, and the admin has to know before reviewing.
+      const ai = data.quality === 'ai';
+      $('engineBanner').className = 'banner ' + (ai ? 'ok' : 'warn');
+      $('engineBanner').innerHTML = ai
+        ? '<div><b>Généré par l’IA — ' + data.engine + '</b>' +
+          'Relisez quand même : l’IA se trompe parfois sur un type de question.</div>'
+        : '<div><b>⚠ Généré SANS IA (règles par mots-clés)</b>' +
+          'L’IA n’a pas répondu, ce résultat est nettement moins bon : types approximatifs, ' +
+          'aucune option proposée, pas d’arabe. Relancez la génération pour réessayer l’IA, ' +
+          'ou corrigez chaque question ci-dessous.</div>';
+
+      const t = currentSurvey.title || { fr: '', ar: '' };
+      $('previewTitle').disabled = false;
+      $('previewTitle').value = t.fr || '';
+      $('previewTitle').oninput = () => {
+        currentSurvey.title.fr = $('previewTitle').value;
+        currentSurvey.pages.forEach((p) => { p.title = currentSurvey.title; });
+        syncJson();
+      };
+      $('previewTitleAr').textContent = t.ar || '';
+
+      renderPreview();
+      $('pubBtn').disabled = false;
+
+      const cls = ai ? 'engine' : 'engine fallback';
+      const label = ai ? data.engine : 'sans IA';
+      $('genStatus').innerHTML =
+        '\u2713 ' + data.questionCount + ' questions en ' + secs + 's <span class="' + cls + '">' + label + '</span>';
+      $('genStatus').className = 'status ok';
+    }
+
+    // ---- The single AI box: whole survey, or one question ----
+    async function askAiAboutQuestion(q, instruction) {
+      const res = await api('/api/admin/surveys/fix-question', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: q, instruction, sourceText: currentSourceText }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Echec');
+      Object.keys(q).forEach((k) => delete q[k]);
+      Object.assign(q, data.question);
+      renderPreview();
+    }
+
+    async function askAiAboutSurvey(instruction) {
+      if (!currentSourceText) throw new Error('Generez d’abord depuis un fichier.');
+      resetProgress();
+      const startedAt = Date.now();
+      const res = await api('/api/admin/surveys/regenerate-stream', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sourceText: currentSourceText, title: $('title').value, instructions: instruction }),
+      });
+      if (!res.ok) throw new Error('Erreur serveur (' + res.status + ')');
+      await consumeStream(res, startedAt);
+    }
+
+    $('askBtn').addEventListener('click', runAsk);
+    $('askText').addEventListener('keydown', (e) => { if (e.key === 'Enter') runAsk(); });
+
+    async function runAsk() {
+      const instruction = $('askText').value.trim();
+      if (!instruction) return setStatus('regenStatus', 'Ecrivez une consigne.', 'err');
+      const scope = $('askScope').value;
+      setStatus('regenStatus', '', '');
+      $('askBtn').disabled = true; $('genBtn').disabled = true;
+      try {
+        if (scope === 'all') {
+          await askAiAboutSurvey(instruction);
+          setStatus('regenStatus', '\u2713 Enquete regeneree avec votre consigne.', 'ok');
+        } else {
+          const q = allQuestions().find((x) => x.id === scope);
+          if (!q) throw new Error('Question introuvable.');
+          await askAiAboutQuestion(q, instruction);
+          setStatus('regenStatus', '\u2713 Question mise a jour.', 'ok');
+        }
+        $('askText').value = '';
+      } catch (e) {
+        $('progBar').classList.remove('indeterminate');
+        setStatus('regenStatus', 'x ' + e.message, 'err');
+      } finally { $('askBtn').disabled = false; $('genBtn').disabled = false; }
+    }
+
     $('pubBtn').addEventListener('click', async () => {
       if (!currentSurvey) return; setStatus('pubStatus', 'Publication…', ''); $('pubBtn').disabled = true;
       try {

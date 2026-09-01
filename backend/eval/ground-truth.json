@@ -1,0 +1,316 @@
+{
+  "_comment": "Hand-written correct answers for the sample documents. `match` is a distinctive fragment of the question's French label; `types` lists every DEFENSIBLE type (some questions are genuinely ambiguous, e.g. an identification number could be text or number). `options: true` means the question must offer choices.",
+  "20_enquete_menages_2026.docx": {
+    "expectedQuestionCount": 20,
+    "questions": [
+      {
+        "match": "chef de m",
+        "types": [
+          "text"
+        ],
+        "options": false,
+        "required": true
+      },
+      {
+        "match": "identification",
+        "types": [
+          "text",
+          "number"
+        ],
+        "options": false,
+        "required": true
+      },
+      {
+        "match": "date de la visite",
+        "types": [
+          "date"
+        ],
+        "options": false,
+        "required": true
+      },
+      {
+        "match": "milieu de r",
+        "types": [
+          "radio"
+        ],
+        "options": true,
+        "required": true
+      },
+      {
+        "match": "gion",
+        "types": [
+          "dropdown"
+        ],
+        "options": true,
+        "required": true
+      },
+      {
+        "match": [
+          "personnes vivent",
+          "personnes vivant",
+          "nombre de personnes",
+          "taille du m"
+        ],
+        "types": [
+          "number"
+        ],
+        "options": false,
+        "required": true
+      },
+      {
+        "match": "ge du chef",
+        "types": [
+          "number"
+        ],
+        "options": false,
+        "required": true
+      },
+      {
+        "match": "sexe",
+        "types": [
+          "radio"
+        ],
+        "options": true,
+        "required": true
+      },
+      {
+        "match": "matrimoniale",
+        "types": [
+          "radio",
+          "dropdown"
+        ],
+        "options": true,
+        "required": true
+      },
+      {
+        "match": "enfants",
+        "types": [
+          "number"
+        ],
+        "options": false,
+        "required": true
+      },
+      {
+        "match": "activité professionnelle",
+        "types": [
+          "radio"
+        ],
+        "options": true,
+        "required": true
+      },
+      {
+        "match": [
+          "secteur"
+        ],
+        "types": [
+          "dropdown",
+          "radio"
+        ],
+        "options": true,
+        "required": true
+      },
+      {
+        "match": "sources de revenu",
+        "types": [
+          "checkbox"
+        ],
+        "options": true,
+        "required": true
+      },
+      {
+        "match": "revenu mensuel",
+        "types": [
+          "number"
+        ],
+        "options": false,
+        "required": true
+      },
+      {
+        "match": "type de logement",
+        "types": [
+          "dropdown"
+        ],
+        "options": true,
+        "required": true
+      },
+      {
+        "match": "lectricit",
+        "types": [
+          "radio"
+        ],
+        "options": true,
+        "required": true
+      },
+      {
+        "match": "eau potable",
+        "types": [
+          "radio"
+        ],
+        "options": true,
+        "required": true
+      },
+      {
+        "match": "pièces",
+        "types": [
+          "number"
+        ],
+        "options": false,
+        "required": true
+      },
+      {
+        "match": "quipements",
+        "types": [
+          "checkbox"
+        ],
+        "options": true,
+        "required": true
+      },
+      {
+        "match": [
+          "observations",
+          "remarques"
+        ],
+        "types": [
+          "text"
+        ],
+        "options": false,
+        "required": false
+      }
+    ]
+  },
+  "10_enquete_emploi_difficile.docx": {
+    "expectedQuestionCount": 14,
+    "questions": [
+      {
+        "match": "niveau d'études",
+        "types": [
+          "dropdown"
+        ],
+        "options": true,
+        "required": true
+      },
+      {
+        "match": [
+          "combien de mois",
+          "depuis combien",
+          "nombre de mois",
+          "duree de recherche"
+        ],
+        "types": [
+          "number"
+        ],
+        "options": false,
+        "required": true
+      },
+      {
+        "match": "date de naissance",
+        "types": [
+          "date"
+        ],
+        "options": false,
+        "required": true
+      },
+      {
+        "match": "anapec",
+        "types": [
+          "radio"
+        ],
+        "options": true,
+        "required": true
+      },
+      {
+        "match": "situation actuelle",
+        "types": [
+          "dropdown",
+          "radio"
+        ],
+        "options": true,
+        "required": true
+      },
+      {
+        "match": "statut professionnel",
+        "types": [
+          "dropdown",
+          "radio"
+        ],
+        "options": true,
+        "required": false
+      },
+      {
+        "match": "heures",
+        "types": [
+          "number"
+        ],
+        "options": false,
+        "required": true
+      },
+      {
+        "match": [
+          "moyens",
+          "canaux",
+          "comment cherchez"
+        ],
+        "types": [
+          "checkbox"
+        ],
+        "options": true,
+        "required": true
+      },
+      {
+        "match": "salaire",
+        "types": [
+          "number"
+        ],
+        "options": false,
+        "required": true
+      },
+      {
+        "match": "formation professionnelle",
+        "types": [
+          "radio"
+        ],
+        "options": true,
+        "required": true
+      },
+      {
+        "match": [
+          "domaines",
+          "former"
+        ],
+        "types": [
+          "checkbox"
+        ],
+        "options": true,
+        "required": true
+      },
+      {
+        "match": "langues",
+        "types": [
+          "dropdown",
+          "radio"
+        ],
+        "options": true,
+        "required": true
+      },
+      {
+        "match": "difficult",
+        "types": [
+          "text"
+        ],
+        "options": false,
+        "required": true
+      },
+      {
+        "match": [
+          "commentaires",
+          "remarques libres"
+        ],
+        "types": [
+          "text"
+        ],
+        "options": false,
+        "required": false
+      }
+    ]
+  }
+}

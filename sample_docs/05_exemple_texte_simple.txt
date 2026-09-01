@@ -1,0 +1,10 @@
+1. Nom et prénom de l'enquêté
+2. Date de l'entretien
+3. Sexe (Masculin / Féminin)
+4. Quel est votre âge ?
+5. Quelle est votre situation professionnelle ?
+6. Quels moyens de transport utilisez-vous ? (plusieurs réponses)
+7. Revenu mensuel en dirhams
+8. Êtes-vous satisfait des services publics de votre commune ? (Oui / Non)
+9. Décrivez les principaux problèmes de votre quartier.
+10. Commentaires (facultatif)

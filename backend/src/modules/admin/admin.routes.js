@@ -6,6 +6,10 @@ import {
   loginController,
   meController,
   generateController,
+  generateStreamController,
+  regenerateStreamController,
+  fixQuestionController,
+  llmStatusController,
   publishController,
   listSurveysController,
   setSurveyActiveController,
@@ -31,7 +35,11 @@ router.use(requireAdmin);
 router.get('/me', meController);
 
 // Survey generation + management
+router.get('/llm/status', llmStatusController);
 router.post('/surveys/generate', upload.single('file'), generateController);
+router.post('/surveys/generate-stream', upload.single('file'), generateStreamController);
+router.post('/surveys/regenerate-stream', regenerateStreamController);
+router.post('/surveys/fix-question', fixQuestionController);
 router.post('/surveys/publish', publishController);
 router.get('/surveys', listSurveysController);
 router.post('/surveys/:id/active', setSurveyActiveController);

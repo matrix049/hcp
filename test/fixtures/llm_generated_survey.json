@@ -1,0 +1,470 @@
+{
+  "id": "survey_emploi_jeunes_2026",
+  "version": 1,
+  "title": {
+    "fr": "Enquête Emploi Jeunes 2026",
+    "ar": "بحث التشغيل لدى الشباب 2026"
+  },
+  "locales": [
+    "fr",
+    "ar"
+  ],
+  "pages": [
+    {
+      "id": "page_1",
+      "title": {
+        "fr": "Enquête Emploi Jeunes 2026",
+        "ar": "بحث التشغيل لدى الشباب 2026"
+      },
+      "questions": [
+        {
+          "id": "q_1",
+          "type": "dropdown",
+          "label": {
+            "fr": "Quel est votre niveau d'études le plus élevé ?",
+            "ar": "ما هو أعلى مستوى دراسي بلغته؟"
+          },
+          "required": true,
+          "options": [
+            {
+              "value": "sans_diplome",
+              "label": {
+                "fr": "Sans diplôme",
+                "ar": "بدون شهادة"
+              }
+            },
+            {
+              "value": "primaire",
+              "label": {
+                "fr": "Enseignement primaire",
+                "ar": "التعليم الابتدائي"
+              }
+            },
+            {
+              "value": "secondaire_collegial",
+              "label": {
+                "fr": "Enseignement secondaire collégial",
+                "ar": "التعليم الثانوي الإعدادي"
+              }
+            },
+            {
+              "value": "secondaire_qualifiant",
+              "label": {
+                "fr": "Enseignement secondaire qualifiant",
+                "ar": "التعليم الثانوي التأهيلي"
+              }
+            },
+            {
+              "value": "superieur",
+              "label": {
+                "fr": "Enseignement supérieur",
+                "ar": "التعليم العالي"
+              }
+            }
+          ],
+          "help": {
+            "fr": "Sélectionnez le dernier niveau d'études validé.",
+            "ar": "اختر آخر مستوى دراسي تم إكماله بنجاح."
+          }
+        },
+        {
+          "id": "q_2",
+          "type": "number",
+          "label": {
+            "fr": "Depuis combien de mois cherchez-vous un emploi ?",
+            "ar": "منذ كم من شهر وأنت تبحث عن عمل؟"
+          },
+          "required": true,
+          "validation": {
+            "min": 0
+          },
+          "help": {
+            "fr": "Saisissez le nombre de mois. Indiquez 0 si moins d'un mois.",
+            "ar": "أدخل عدد الأشهر. اكتب 0 إذا كان أقل من شهر."
+          }
+        },
+        {
+          "id": "q_3",
+          "type": "date",
+          "label": {
+            "fr": "Date de naissance",
+            "ar": "تاريخ الازدياد"
+          },
+          "required": true,
+          "help": {
+            "fr": "Saisissez la date de naissance exacte selon la CIN ou l'acte de naissance.",
+            "ar": "أدخل تاريخ الازدياد بدقة حسب البطاقة الوطنية أو عقد الازدياد."
+          }
+        },
+        {
+          "id": "q_4",
+          "type": "radio",
+          "label": {
+            "fr": "Êtes-vous actuellement inscrit à l'ANAPEC ?",
+            "ar": "هل أنت مسجل حالياً في الوكالة الوطنية لإنعاش التشغيل والكفاءات؟"
+          },
+          "required": true,
+          "options": [
+            {
+              "value": "oui",
+              "label": {
+                "fr": "Oui",
+                "ar": "نعم"
+              }
+            },
+            {
+              "value": "non",
+              "label": {
+                "fr": "Non",
+                "ar": "لا"
+              }
+            }
+          ],
+          "help": {
+            "fr": "Vérifiez si l'inscription est toujours active.",
+            "ar": "تحقق مما إذا كان التسجيل لا يزال نشطاً."
+          }
+        },
+        {
+          "id": "q_5",
+          "type": "dropdown",
+          "label": {
+            "fr": "Quelle est votre situation actuelle vis-à-vis de l'emploi ?",
+            "ar": "ما هي وضعيتك الحالية تجاه التشغيل؟"
+          },
+          "required": true,
+          "options": [
+            {
+              "value": "actif_occupe",
+              "label": {
+                "fr": "Actif occupé",
+                "ar": "نشيط مشتغل"
+              }
+            },
+            {
+              "value": "chomeur",
+              "label": {
+                "fr": "Chômeur",
+                "ar": "عاطل"
+              }
+            },
+            {
+              "value": "etudiant",
+              "label": {
+                "fr": "Étudiant ou stagiaire",
+                "ar": "طالب أو متدرب"
+              }
+            },
+            {
+              "value": "foyer",
+              "label": {
+                "fr": "Au foyer",
+                "ar": "رب(ة) بيت"
+              }
+            },
+            {
+              "value": "autre",
+              "label": {
+                "fr": "Autre inactif",
+                "ar": "غير نشيط آخر"
+              }
+            }
+          ],
+          "help": {
+            "fr": "Choisissez la situation principale de l'enquêté.",
+            "ar": "اختر الوضعية الرئيسية للمستجوب."
+          }
+        },
+        {
+          "id": "q_6",
+          "type": "dropdown",
+          "label": {
+            "fr": "Quel est votre statut professionnel ?",
+            "ar": "ما هي وضعيتك المهنية؟"
+          },
+          "required": false,
+          "options": [
+            {
+              "value": "independant",
+              "label": {
+                "fr": "Indépendant / À son propre compte",
+                "ar": "مستقل / لحسابه الخاص"
+              }
+            },
+            {
+              "value": "salarie_public",
+              "label": {
+                "fr": "Salarié du secteur public",
+                "ar": "مأجور في القطاع العمومي"
+              }
+            },
+            {
+              "value": "salarie_prive",
+              "label": {
+                "fr": "Salarié du secteur privé",
+                "ar": "مأجور في القطاع الخاص"
+              }
+            },
+            {
+              "value": "aide_familial",
+              "label": {
+                "fr": "Aide familial",
+                "ar": "مساعد عائلي"
+              }
+            },
+            {
+              "value": "employeur",
+              "label": {
+                "fr": "Employeur",
+                "ar": "مشغِّل"
+              }
+            }
+          ],
+          "help": {
+            "fr": "À remplir uniquement si la personne travaille.",
+            "ar": "يملأ فقط إذا كان الشخص يشتغل."
+          }
+        },
+        {
+          "id": "q_7",
+          "type": "number",
+          "label": {
+            "fr": "Combien d'heures travaillez-vous par semaine en moyenne ?",
+            "ar": "كم عدد الساعات التي تشتغلها في الأسبوع في المتوسط؟"
+          },
+          "required": true,
+          "validation": {
+            "min": 0
+          },
+          "help": {
+            "fr": "Indiquez le nombre moyen d'heures par semaine.",
+            "ar": "أدخل متوسط عدد الساعات في الأسبوع."
+          }
+        },
+        {
+          "id": "q_8",
+          "type": "checkbox",
+          "label": {
+            "fr": "Quels moyens utilisez-vous pour chercher un emploi ?",
+            "ar": "ما هي الوسائل التي تستعملها للبحث عن عمل؟"
+          },
+          "required": true,
+          "options": [
+            {
+              "value": "anapec",
+              "label": {
+                "fr": "Inscription à l'ANAPEC",
+                "ar": "التسجيل في الوكالة الوطنية لإنعاش التشغيل والكفاءات"
+              }
+            },
+            {
+              "value": "concours",
+              "label": {
+                "fr": "Concours de la fonction publique",
+                "ar": "مباريات الوظيفة العمومية"
+              }
+            },
+            {
+              "value": "candidature_directe",
+              "label": {
+                "fr": "Candidatures directes auprès des employeurs",
+                "ar": "طلبات مباشرة للمشغلين"
+              }
+            },
+            {
+              "value": "reseau_personnel",
+              "label": {
+                "fr": "Réseau personnel et familial",
+                "ar": "شبكة العلاقات الشخصية والعائلية"
+              }
+            },
+            {
+              "value": "internet",
+              "label": {
+                "fr": "Internet et réseaux sociaux",
+                "ar": "الإنترنت وشبكات التواصل الاجتماعي"
+              }
+            },
+            {
+              "value": "autre",
+              "label": {
+                "fr": "Autre moyen",
+                "ar": "وسيلة أخرى"
+              }
+            }
+          ],
+          "help": {
+            "fr": "Sélectionnez toutes les options qui s'appliquent.",
+            "ar": "اختر جميع الإجابات المناسبة."
+          }
+        },
+        {
+          "id": "q_9",
+          "type": "number",
+          "label": {
+            "fr": "Quel est votre salaire mensuel net ?",
+            "ar": "ما هو راتبك الشهري الصافي؟"
+          },
+          "required": true,
+          "validation": {
+            "min": 0
+          },
+          "help": {
+            "fr": "Saisissez le montant net en Dirhams (DH).",
+            "ar": "أدخل المبلغ الصافي بالدرهم المغربي."
+          }
+        },
+        {
+          "id": "q_10",
+          "type": "radio",
+          "label": {
+            "fr": "Avez-vous suivi une formation professionnelle au cours des 12 derniers mois ?",
+            "ar": "هل تابعت تكويناً مهنياً خلال الـ 12 شهراً الماضية؟"
+          },
+          "required": true,
+          "options": [
+            {
+              "value": "oui",
+              "label": {
+                "fr": "Oui",
+                "ar": "نعم"
+              }
+            },
+            {
+              "value": "non",
+              "label": {
+                "fr": "Non",
+                "ar": "لا"
+              }
+            }
+          ],
+          "help": {
+            "fr": "Concerne toute formation qualifiante ou diplômante.",
+            "ar": "يشمل أي تكوين مؤهل أو متوج بشهادة."
+          }
+        },
+        {
+          "id": "q_11",
+          "type": "checkbox",
+          "label": {
+            "fr": "Dans quels domaines souhaiteriez-vous vous former ?",
+            "ar": "ما هي المجالات التي ترغب في التكون فيها؟"
+          },
+          "required": true,
+          "options": [
+            {
+              "value": "informatique",
+              "label": {
+                "fr": "Informatique et digital",
+                "ar": "المعلوميات والرقميات"
+              }
+            },
+            {
+              "value": "langues",
+              "label": {
+                "fr": "Langues étrangères",
+                "ar": "اللغات الأجنبية"
+              }
+            },
+            {
+              "value": "gestion",
+              "label": {
+                "fr": "Gestion et entrepreneuriat",
+                "ar": "التسيير وريادة الأعمال"
+              }
+            },
+            {
+              "value": "technique",
+              "label": {
+                "fr": "Métiers techniques et artisanat",
+                "ar": "المهن التقنية والحرفية"
+              }
+            },
+            {
+              "value": "communication",
+              "label": {
+                "fr": "Communication et soft skills",
+                "ar": "التواصل والمهارات الحياتية"
+              }
+            },
+            {
+              "value": "autre",
+              "label": {
+                "fr": "Autre domaine",
+                "ar": "مجال آخر"
+              }
+            }
+          ],
+          "help": {
+            "fr": "Sélectionnez un ou plusieurs domaines d'intérêt.",
+            "ar": "اختر مجالاً واحداً أو أكثر من مجالات الاهتمام."
+          }
+        },
+        {
+          "id": "q_12",
+          "type": "dropdown",
+          "label": {
+            "fr": "Quel est votre niveau en langues ?",
+            "ar": "ما هو مستواك في اللغات؟"
+          },
+          "required": true,
+          "options": [
+            {
+              "value": "debutant",
+              "label": {
+                "fr": "Débutant",
+                "ar": "مبتدئ"
+              }
+            },
+            {
+              "value": "intermediaire",
+              "label": {
+                "fr": "Intermédiaire",
+                "ar": "متوسط"
+              }
+            },
+            {
+              "value": "avance",
+              "label": {
+                "fr": "Avancé / Courant",
+                "ar": "متقدم / بطلاقة"
+              }
+            }
+          ],
+          "help": {
+            "fr": "Évaluez globalement le niveau en français et anglais.",
+            "ar": "قم بتقييم المستوى العام في اللغتين الفرنسية والإنجليزية."
+          }
+        },
+        {
+          "id": "q_13",
+          "type": "text",
+          "label": {
+            "fr": "Décrivez les principales difficultés que vous rencontrez dans votre recherche d'emploi.",
+            "ar": "صف الصعوبات الرئيسية التي تواجهها في بحثك عن عمل."
+          },
+          "required": true,
+          "multiline": true,
+          "help": {
+            "fr": "Laissez l'enquêté s'exprimer librement sur ses obstacles.",
+            "ar": "اترك المستجوب يعبر بحرية عن العقبات التي تواجهه."
+          }
+        },
+        {
+          "id": "q_14",
+          "type": "text",
+          "label": {
+            "fr": "Commentaires libres",
+            "ar": "تعليقات حرة"
+          },
+          "required": false,
+          "multiline": true,
+          "help": {
+            "fr": "Zone de texte pour toute remarque additionnelle.",
+            "ar": "مساحة مخصصة لأي ملاحظات إضافية."
+          }
+        }
+      ]
+    }
+  ]
+}

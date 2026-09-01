@@ -2,6 +2,8 @@ import bcrypt from 'bcryptjs';
 import mammoth from 'mammoth';
 
 import { query } from '../../db/pool.js';
+import { generateWithLlm } from './llm/index.js';
+import { normalizeSurvey, toSurveyDefinition } from './llm/schema.js';
 
 /**
  * ADMIN — survey generation pipeline.
@@ -11,10 +13,10 @@ import { query } from '../../db/pool.js';
  *                      →  generateSurvey()    [STEP 3: build the app's survey JSON]
  *                      →  publishSurvey()     [STEP 4: save to PostgreSQL]
  *
- * STEP 3 currently uses a lightweight heuristic classifier. This is the single
- * place the LLM plugs in next: replace `classifyQuestion()` with a call that
- * sends each question (in batches, in parallel) to the model and returns its
- * type + options. The rest of the pipeline stays exactly the same.
+ * STEP 3 runs the LLM ladder (`./llm/`): Claude -> Gemini -> this file's regex
+ * `classifyQuestion()` heuristic as the floor. The heuristic is deliberately
+ * kept: it is what answers when no API key works, so the tool degrades in
+ * quality instead of failing outright.
  */
 
 // --- STEP 1: extract plain text from the uploaded file (deterministic) ---
@@ -28,14 +30,90 @@ export async function extractText(file) {
   return file.buffer.toString('utf8');
 }
 
-// --- STEP 2: split raw text into individual question lines ---
-export function splitIntoQuestions(text) {
-  return text
-    .split(/\r?\n/)
+/**
+ * The document's real question lines, with titles and section headings removed.
+ *
+ * A .docx knows which paragraphs are headings, so use that structure instead of
+ * guessing from the words: it is the difference between "Section A -
+ * Identification" being dropped and it becoming a text question. Plain-text
+ * uploads have no structure, so they fall back to the wording rules below.
+ */
+export async function extractQuestionLines(file) {
+  const name = (file.originalname || '').toLowerCase();
+  if (!name.endsWith('.docx')) {
+    return splitIntoQuestions(file.buffer.toString('utf8'));
+  }
+
+  // Word's "Title" and "Subtitle" styles are plain paragraphs to mammoth by
+  // default, so the document's own title arrived as question 1. Map them to
+  // headings and the heading rule below removes them. The style map is
+  // mammoth's SECOND argument - passing it inside the input object is silently
+  // ignored. French style names are included for documents authored in Word FR.
+  const { value: html } = await mammoth.convertToHtml(
+    { buffer: file.buffer },
+    {
+      styleMap: [
+        "p[style-name='Title'] => h1",
+        "p[style-name='Subtitle'] => h2",
+        "p[style-name='Titre'] => h1",
+        "p[style-name='Sous-titre'] => h2",
+      ],
+    },
+  );
+  const lines = [];
+  const block = /<(h[1-6]|p)[^>]*>([\s\S]*?)<\/\1>/gi;
+  let m;
+  while ((m = block.exec(html)) !== null) {
+    const [, tag, inner] = m;
+    if (tag.toLowerCase() !== 'p') continue; // a heading is never a question
+
+    // A paragraph that is entirely italic is an instruction to the surveyor
+    // ("Document de travail...", "Questionnaire destine aux enqueteurs"),
+    // not something to answer.
+    if (/^\s*<em>[\s\S]*<\/em>\s*$/i.test(inner)) continue;
+
+    const text = inner
+      .replace(/<[^>]+>/g, '')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&#(\d+);/g, (_, d) => String.fromCharCode(Number(d)))
+      .trim();
+    if (text) lines.push(text);
+  }
+  return cleanQuestionLines(lines);
+}
+
+/** Strip numbering and drop anything that does not read like a question. */
+function cleanQuestionLines(lines) {
+  return lines
     .map((line) => line.trim())
     // strip leading numbering: "1." "1)" "1-" "Q1:" "Q1."
     .map((line) => line.replace(/^\s*(?:q\s*)?\d+\s*[.)\-:]\s*/i, '').trim())
-    .filter((line) => line.length > 3);
+    .filter((line) => line.length > 3)
+    .filter((line) => !isHeadingLike(line));
+}
+
+/**
+ * Wording-only heading detection, for plain-text uploads where no structure
+ * exists. Deliberately conservative - a false positive silently deletes a
+ * question, which is worse than letting one heading through.
+ */
+function isHeadingLike(line) {
+  // "Section A - Identification", "I. Renseignements generaux", "II - Emploi"
+  if (/^(section|partie|module|chapitre)\b/i.test(line)) return true;
+  if (/^[IVX]{1,5}\s*[.)\-]/.test(line)) return true;
+  // A short line with no question mark, no colon and no verb-like ending is a
+  // label rather than a question ("Identification", "Menage").
+  const words = line.split(/\s+/).length;
+  if (words <= 2 && !/[?:]/.test(line)) return true;
+  return false;
+}
+
+// --- STEP 2: split raw text into individual question lines ---
+export function splitIntoQuestions(text) {
+  return cleanQuestionLines(text.split(/\r?\n/));
 }
 
 // --- STEP 3: build the survey JSON the Flutter app expects ---
@@ -44,12 +122,12 @@ export function generateSurvey(questions, meta = {}) {
   const title = meta.title || 'Enquête générée';
 
   const builtQuestions = questions.map((raw, i) => {
-    const { type, options, label } = classifyQuestion(raw); // ← LLM plugs in here
+    const { type, options, label, required } = classifyQuestion(raw);
     const q = {
       id: `q_${i + 1}`,
       type,
       label: { fr: label },
-      required: true,
+      required,
     };
     if (options) q.options = options;
     if (type === 'number') q.validation = { min: 0 };
@@ -76,8 +154,23 @@ export function generateSurvey(questions, meta = {}) {
  * PLACEHOLDER heuristic — decides a question's type from its wording.
  * To be replaced by an LLM call. Returns { type, options?, label }.
  */
-function classifyQuestion(raw) {
-  const text = raw.toLowerCase();
+function classifyQuestion(rawInput) {
+  // "(facultatif)" / "optionnel" is an instruction about the FIELD, not part of
+  // the question text - honour it and strip it, or every generated survey
+  // forces the surveyor to fill a free-comments box.
+  const optional = /\(?\s*(facultatif|optionnel|non obligatoire)\s*\)?/i.test(rawInput);
+  const raw = rawInput
+    .replace(/\(?\s*(facultatif|optionnel|non obligatoire)\s*\)?/gi, '')
+    .replace(/[\s\-–—:]+$/, '')
+    .trim();
+  const required = !optional;
+  // Fold accents before matching: a word boundary next to an accented letter
+  // does not behave like one for ASCII patterns, so "age" written with its
+  // accent never matched /\bage\b/ and ages came out as free text.
+  const text = raw
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '');
 
   // 1) Explicit options: "(a / b / c)" or "... : a / b / c"
   const paren = raw.match(/\(([^)]*\/[^)]*)\)/);
@@ -93,6 +186,7 @@ function classifyQuestion(raw) {
     return {
       type: multiple ? 'checkbox' : values.length > 3 ? 'dropdown' : 'radio',
       label: label || raw,
+      required,
       options: values.map((v) => ({ value: slug(v), label: { fr: v } })),
     };
   }
@@ -102,6 +196,7 @@ function classifyQuestion(raw) {
     return {
       type: 'radio',
       label: raw,
+      required,
       options: [
         { value: 'oui', label: { fr: 'Oui' } },
         { value: 'non', label: { fr: 'Non' } },
@@ -109,23 +204,30 @@ function classifyQuestion(raw) {
     };
   }
 
-  // 3) Numeric
-  if (/combien|nombre|\bâge\b|\bage\b|revenu|montant|salaire|number|how many|quantit/.test(text)) {
-    return { type: 'number', label: raw };
+  // 3) Multi-answer wording, but the document never listed the choices. The
+  //    heuristic cannot invent them, so leave it as free text rather than let
+  //    the numeric rule below claim it because the sentence says "revenu".
+  if (/plusieurs (reponses|choix)|cochez|multiple/.test(text)) {
+    return { type: 'text', label: raw, required };
+  }
+
+  // 4) Numeric
+  if (/combien|nombre|\bage\b|revenu|montant|salaire|number|how many|quantit/.test(text)) {
+    return { type: 'number', label: raw, required };
   }
 
   // 4) Date
   if (/\bdate\b|quand|jour de/.test(text)) {
-    return { type: 'date', label: raw };
+    return { type: 'date', label: raw, required };
   }
 
   // 5) GPS / location
   if (/gps|localisation|coordonn|position/.test(text)) {
-    return { type: 'gps', label: raw };
+    return { type: 'gps', label: raw, required };
   }
 
   // 6) Default: free text
-  return { type: 'text', label: raw };
+  return { type: 'text', label: raw, required };
 }
 
 function slug(s) {
@@ -223,4 +325,63 @@ export async function updateAgent(id, a) {
     [id, a.firstName, a.lastName, a.role || 'agent', a.region, a.phone || null, hash],
   );
   return rowCount > 0;
+}
+
+// ===================== STEP 3 ORCHESTRATION (LLM -> heuristic) =====================
+
+/**
+ * Turn raw document text into a reviewable survey definition.
+ *
+ * Tries the LLM ladder first; falls back to the regex heuristic when every
+ * tier is unavailable, so the admin tool always returns something.
+ *
+ * Nothing is saved here — the admin reviews the result and calls publish.
+ * Returns { definition, engine, quality, repairs, attempts }.
+ */
+export async function generateSurveyFromText(text, { title, id, onProgress, lines, instructions } = {}) {
+  // `lines` comes from the document's structure (headings already removed) when
+  // the caller has the file; text-only callers fall back to wording rules.
+  const questionLines = lines ?? splitIntoQuestions(text);
+  if (questionLines.length === 0) {
+    const err = new Error('No questions found in the file.');
+    err.status = 400;
+    throw err;
+  }
+
+  const llm = await generateWithLlm(text, { title, instructions, lines: questionLines, onProgress });
+  if (llm.survey) {
+    const repairs = [...llm.repairs];
+    // Second safety net behind the provider's own truncation check: the model
+    // can also stop cleanly having simply skipped part of a long document.
+    // `questionLines` over-counts (it includes section headings), so only a
+    // wide gap is worth flagging - and it warns the admin rather than blocking,
+    // because a document really can be mostly headings.
+    if (llm.survey.questions.length < questionLines.length * 0.5) {
+      repairs.push(
+        `Attention : ${llm.survey.questions.length} question(s) extraite(s) pour ` +
+          `${questionLines.length} ligne(s) dans le document. Verifiez qu'aucune question ne manque.`,
+      );
+    }
+    return {
+      definition: toSurveyDefinition(llm.survey, { id }),
+      engine: llm.engine,
+      quality: 'ai',
+      repairs,
+      attempts: llm.attempts,
+    };
+  }
+
+  // Floor: keyword rules. Weaker output, but never a dead end.
+  const heuristic = generateSurvey(questionLines, { title, stamp: Date.now() });
+  const { survey, repairs } = normalizeSurvey(
+    { title: heuristic.title, questions: heuristic.pages[0].questions },
+    { fallbackTitle: title },
+  );
+  return {
+    definition: toSurveyDefinition(survey, { id }),
+    engine: 'heuristic',
+    quality: 'fallback',
+    repairs,
+    attempts: llm.attempts,
+  };
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../l10n/app_localizations.dart';
+
 import '../../../../core/utils/date_format.dart';
 import '../../../sync/presentation/widgets/sync_status_chip.dart';
 import '../../domain/entities/survey_response.dart';
@@ -39,11 +41,11 @@ class SurveyResponsesPage extends ConsumerWidget {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openResponse(context),
         icon: const Icon(Icons.add),
-        label: const Text('Nouvelle réponse'),
+        label: Text(AppLocalizations.of(context).questionnaireNew),
       ),
       body: responses.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => const Center(child: Text('Impossible de charger les réponses')),
+        error: (_, __) => Center(child: Text(AppLocalizations.of(context).responsesLoadFailed)),
         data: (list) {
           if (list.isEmpty) {
             return const Center(
@@ -77,8 +79,8 @@ class _ResponseTile extends StatelessWidget {
     return Card(
       child: ListTile(
         leading: const Icon(Icons.description_outlined),
-        title: Text('Réponse n°${response.shortId}'),
-        subtitle: Text('Modifiée le ${formatShortDateTime(response.updatedAt)}'),
+        title: Text(AppLocalizations.of(context).responseNumber(response.shortId)),
+        subtitle: Text(AppLocalizations.of(context).responseUpdatedAt(formatShortDateTime(response.updatedAt))),
         trailing: SyncStatusChip(status: response.status),
         onTap: onTap,
       ),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../l10n/app_localizations.dart';
+
 import '../../../../core/error/failures.dart';
 import '../../../history/presentation/pages/history_page.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
@@ -15,22 +17,23 @@ class SurveysPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final available = ref.watch(availableSurveysProvider);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Enquêtes'),
+        title: Text(l10n.surveysTitle),
         actions: [
           const SyncStatusIndicator(),
           IconButton(
-            tooltip: 'Historique',
+            tooltip: l10n.historyTitle,
             icon: const Icon(Icons.history),
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const HistoryPage()),
             ),
           ),
           IconButton(
-            tooltip: 'Profil',
+            tooltip: l10n.profileTitle,
             icon: const Icon(Icons.person_outline),
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const ProfilePage()),
@@ -44,7 +47,7 @@ class SurveysPage extends ConsumerWidget {
           loading: () => const Center(child: CircularProgressIndicator()),
           data: (surveys) => _SurveyList(surveys: surveys),
           error: (err, _) => _OfflineFallback(
-            message: err is Failure ? err.message : 'Could not reach the server',
+            message: err is Failure ? err.message : l10n.surveysServerUnreachable,
           ),
         ),
       ),
@@ -60,7 +63,7 @@ class _SurveyList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (surveys.isEmpty) {
-      return const _CenteredMessage('No surveys available.');
+      return _CenteredMessage(AppLocalizations.of(context).surveysEmpty);
     }
     return ListView.separated(
       padding: const EdgeInsets.all(12),
@@ -79,17 +82,18 @@ class _OfflineFallback extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final downloaded = ref.watch(downloadedSurveysProvider);
     return Column(
       children: [
         MaterialBanner(
           backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
           leading: const Icon(Icons.cloud_off),
-          content: Text('Hors ligne — enquêtes téléchargées uniquement.\n$message'),
+          content: Text('${l10n.surveysOfflineBanner}\n$message'),
           actions: [
             TextButton(
               onPressed: () => ref.invalidate(availableSurveysProvider),
-              child: const Text('Réessayer'),
+              child: Text(l10n.retry),
             ),
           ],
         ),
@@ -97,7 +101,7 @@ class _OfflineFallback extends ConsumerWidget {
           child: downloaded.when(
             loading: () => const Center(child: CircularProgressIndicator()),
             data: (surveys) => _SurveyList(surveys: surveys),
-            error: (_, __) => const _CenteredMessage('No downloaded surveys.'),
+            error: (_, __) => _CenteredMessage(l10n.surveysNoneDownloaded),
           ),
         ),
       ],
@@ -128,7 +132,7 @@ class _SurveyTileState extends ConsumerState<_SurveyTile> {
     result.fold(
       (f) => _snack(f.message),
       (_) {
-        _snack('Téléchargée "${widget.survey.title}"');
+        _snack(AppLocalizations.of(context).surveyDownloadedToast(widget.survey.title));
         // Refresh the "downloaded" flags on the available list.
         ref.invalidate(availableSurveysProvider);
       },
@@ -143,15 +147,18 @@ class _SurveyTileState extends ConsumerState<_SurveyTile> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final s = widget.survey;
     return Card(
       child: ListTile(
         leading: const Icon(Icons.assignment_outlined),
         title: Text(s.title),
         subtitle: Text(
-          s.isDownloaded ? 'Version ${s.version} · Tap to open' : 'Version ${s.version}',
+          s.isDownloaded
+              ? l10n.surveyVersionTapToOpen(s.version)
+              : l10n.surveyVersion(s.version),
         ),
-        trailing: _buildTrailing(s),
+        trailing: _buildTrailing(context, s),
         // Only downloaded surveys can be opened (offline-first).
         onTap: s.isDownloaded
             ? () => Navigator.of(context).push(
@@ -167,7 +174,8 @@ class _SurveyTileState extends ConsumerState<_SurveyTile> {
     );
   }
 
-  Widget _buildTrailing(Survey s) {
+  Widget _buildTrailing(BuildContext context, Survey s) {
+    final l10n = AppLocalizations.of(context);
     if (_downloading) {
       return const SizedBox(
         height: 20,
@@ -176,15 +184,15 @@ class _SurveyTileState extends ConsumerState<_SurveyTile> {
       );
     }
     if (s.isDownloaded) {
-      return const Chip(
-        avatar: Icon(Icons.check, size: 18),
-        label: Text('Téléchargée'),
+      return Chip(
+        avatar: const Icon(Icons.check, size: 18),
+        label: Text(l10n.surveyDownloaded),
       );
     }
     return FilledButton.tonalIcon(
       onPressed: _download,
       icon: const Icon(Icons.download),
-      label: const Text('Télécharger'),
+      label: Text(l10n.surveyDownload),
     );
   }
 }

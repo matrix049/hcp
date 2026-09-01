@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../l10n/app_localizations.dart';
+
 import '../../../../core/settings/locale_controller.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../auth/presentation/providers/auth_state.dart';
@@ -11,13 +13,14 @@ class ProfilePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final state = ref.watch(authControllerProvider);
     final agent = state is AuthAuthenticated ? state.agent : null;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Profil')),
+      appBar: AppBar(title: Text(l10n.profileTitle)),
       body: agent == null
-          ? const Center(child: Text('Non connecté'))
+          ? Center(child: Text(l10n.profileNotSignedIn))
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
@@ -40,17 +43,17 @@ class ProfilePage extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 24),
-                _InfoTile(icon: Icons.badge_outlined, label: 'Matricule', value: agent.matricule),
-                _InfoTile(icon: Icons.work_outline, label: 'Rôle', value: agent.role),
-                _InfoTile(icon: Icons.map_outlined, label: 'Région', value: agent.region),
+                _InfoTile(icon: Icons.badge_outlined, label: l10n.profileMatricule, value: agent.matricule),
+                _InfoTile(icon: Icons.work_outline, label: l10n.profileRole, value: agent.role),
+                _InfoTile(icon: Icons.map_outlined, label: l10n.profileRegion, value: agent.region),
                 if (agent.phone != null && agent.phone!.isNotEmpty)
-                  _InfoTile(icon: Icons.phone_outlined, label: 'Téléphone', value: agent.phone!),
+                  _InfoTile(icon: Icons.phone_outlined, label: l10n.profilePhone, value: agent.phone!),
                 const SizedBox(height: 24),
                 const _LanguageSelector(),
                 const SizedBox(height: 24),
                 FilledButton.tonalIcon(
                   icon: const Icon(Icons.logout),
-                  label: const Text('Déconnexion'),
+                  label: Text(l10n.profileSignOut),
                   onPressed: () async {
                     await ref.read(authControllerProvider.notifier).logout();
                     if (context.mounted) {
@@ -89,7 +92,9 @@ class _LanguageSelector extends ConsumerWidget {
                 const Icon(Icons.translate),
                 const SizedBox(width: 12),
                 Text(
-                  'Langue / اللغة',
+                  // The pair is shown together on purpose: an agent looking for
+                  // the language switch may not read the current language.
+                  '${AppLocalizations.of(context).profileLanguage} / اللغة',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ],

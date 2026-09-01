@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../../../l10n/app_localizations.dart';
+
 import '../../../../core/error/failures.dart';
 import '../../../../core/settings/locale_controller.dart';
 import '../../../../core/sync/sync_status.dart';
@@ -33,16 +35,19 @@ class QuestionnairePage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
     final definition = ref.watch(surveyDefinitionProvider(surveyRemoteId));
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(responseId == null ? 'Nouvelle réponse' : 'Modifier la réponse'),
+        title: Text(
+          responseId == null ? l10n.questionnaireNew : l10n.questionnaireEdit,
+        ),
       ),
       body: definition.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(
-          child: Text(err is Failure ? err.message : 'Impossible de charger l’enquête'),
+          child: Text(err is Failure ? err.message : l10n.questionnaireLoadFailed),
         ),
         data: (survey) => _QuestionnaireForm(
           survey: survey,
@@ -151,15 +156,17 @@ class _QuestionnaireFormState extends ConsumerState<_QuestionnaireForm> {
         if (!_isVisible(q)) continue;
         final value = _answers[q.id];
         if (q.required && _isEmpty(value)) {
-          errors[q.id] = 'Cette question est obligatoire';
+          errors[q.id] = AppLocalizations.of(context).questionnaireRequired;
           continue;
         }
         if (value is num && q.validation != null) {
           final v = q.validation!;
           if (v.min != null && value < v.min!) {
-            errors[q.id] = 'Minimum : ${v.min}';
+            errors[q.id] =
+                AppLocalizations.of(context).questionnaireMin('${v.min}');
           } else if (v.max != null && value > v.max!) {
-            errors[q.id] = 'Maximum : ${v.max}';
+            errors[q.id] =
+                AppLocalizations.of(context).questionnaireMax('${v.max}');
           }
         }
       }
@@ -176,7 +183,9 @@ class _QuestionnaireFormState extends ConsumerState<_QuestionnaireForm> {
     unawaited(ref.read(syncControllerProvider.notifier).syncNow());
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Réponse enregistrée et mise en file d’envoi')),
+      SnackBar(
+        content: Text(AppLocalizations.of(context).questionnaireFinalized),
+      ),
     );
     Navigator.of(context).pop();
   }
@@ -185,7 +194,7 @@ class _QuestionnaireFormState extends ConsumerState<_QuestionnaireForm> {
     await _saveDraft();
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Brouillon enregistré')),
+      SnackBar(content: Text(AppLocalizations.of(context).questionnaireDraftSaved)),
     );
   }
 
@@ -234,7 +243,7 @@ class _QuestionnaireFormState extends ConsumerState<_QuestionnaireForm> {
         FilledButton.tonalIcon(
           onPressed: () => setState(() => _readOnly = false),
           icon: const Icon(Icons.edit_outlined),
-          label: const Text('Corriger'),
+          label: Text(AppLocalizations.of(context).questionnaireMakeCorrection),
         ),
       ];
     }
@@ -242,32 +251,29 @@ class _QuestionnaireFormState extends ConsumerState<_QuestionnaireForm> {
       OutlinedButton.icon(
         onPressed: _onSaveDraftPressed,
         icon: const Icon(Icons.save_outlined),
-        label: const Text('Enregistrer le brouillon'),
+        label: Text(AppLocalizations.of(context).questionnaireSaveDraft),
       ),
       const SizedBox(height: 8),
       FilledButton(
         onPressed: _finalize,
-        child: const Padding(
-          padding: EdgeInsets.symmetric(vertical: 12),
-          child: Text('Valider et mettre en file d’envoi'),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: Text(AppLocalizations.of(context).questionnaireFinalize),
         ),
       ),
     ];
   }
 
   Widget _buildLockedBanner() {
-    return const Card(
+    return Card(
       child: Padding(
-        padding: EdgeInsets.all(12),
+        padding: const EdgeInsets.all(12),
         child: Row(
           children: [
-            Icon(Icons.lock_outline),
-            SizedBox(width: 12),
+            const Icon(Icons.lock_outline),
+            const SizedBox(width: 12),
             Expanded(
-              child: Text(
-                'Cette réponse a déjà été envoyée au serveur, elle est donc '
-                'en lecture seule. Appuyez sur « Corriger » pour la modifier et la renvoyer.',
-              ),
+              child: Text(AppLocalizations.of(context).questionnaireLockedBanner),
             ),
           ],
         ),

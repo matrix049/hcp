@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../../l10n/app_localizations.dart';
+
 import '../../domain/entities/survey_question.dart';
 import 'localized_text.dart';
 import 'question_help.dart';
@@ -48,7 +50,7 @@ class _FieldShell extends StatelessWidget {
             if (question.hasHelp)
               IconButton(
                 visualDensity: VisualDensity.compact,
-                tooltip: 'Help',
+                tooltip: AppLocalizations.of(context).helpTitle,
                 icon: const Icon(Icons.help_outline),
                 onPressed: () => showQuestionHelp(context, question, locale),
               ),
@@ -370,7 +372,8 @@ class UnsupportedQuestionField extends StatelessWidget {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                'Question type "${question.type.name}" is not supported yet.',
+                AppLocalizations.of(context)
+                    .questionnaireUnsupportedType(question.type.name),
                 style: Theme.of(context).textTheme.bodySmall,
               ),
             ),

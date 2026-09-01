@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/settings/locale_controller.dart';
+import 'l10n/app_localizations.dart';
 import 'features/auth/presentation/pages/login_page.dart';
 import 'features/auth/presentation/providers/auth_providers.dart';
 import 'features/auth/presentation/providers/auth_state.dart';
@@ -18,7 +19,7 @@ class HcpSurveyApp extends ConsumerWidget {
     final language = ref.watch(localeControllerProvider);
 
     return MaterialApp(
-      title: 'HCP Survey',
+      onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0B6E4F)),
@@ -28,6 +29,9 @@ class HcpSurveyApp extends ConsumerWidget {
       supportedLocales: const [Locale('fr'), Locale('ar')],
       // These delegates make Directionality follow the locale — Arabic = RTL.
       localizationsDelegates: const [
+        // Generated from lib/l10n/*.arb — this is what makes the app's own
+        // chrome follow the selected language, not just the survey content.
+        AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,

@@ -58,6 +58,8 @@ dev_dependencies:
   drift_dev: ^2.20.0
 
 flutter:
+  # Génère AppLocalizations à partir des fichiers .arb de lib/l10n.
+  generate: true
   uses-material-design: true
   assets:
     - assets/surveys/

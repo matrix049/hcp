@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../l10n/app_localizations.dart';
+
 import '../providers/auth_providers.dart';
 import '../providers/auth_state.dart';
 
@@ -45,6 +47,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       }
     });
 
+    final l10n = AppLocalizations.of(context);
     final isLoading = ref.watch(authControllerProvider) is AuthAuthenticating;
 
     return Scaffold(
@@ -63,13 +66,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     const Icon(Icons.assignment_outlined, size: 64),
                     const SizedBox(height: 16),
                     Text(
-                      'HCP Survey',
+                      l10n.appTitle,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Agent sign in',
+                      l10n.loginTitle,
                       textAlign: TextAlign.center,
                       style: Theme.of(context).textTheme.bodyMedium,
                     ),
@@ -77,13 +80,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     TextFormField(
                       controller: _matriculeController,
                       textInputAction: TextInputAction.next,
-                      decoration: const InputDecoration(
-                        labelText: 'Matricule',
-                        prefixIcon: Icon(Icons.badge_outlined),
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: l10n.loginMatricule,
+                        prefixIcon: const Icon(Icons.badge_outlined),
+                        border: const OutlineInputBorder(),
                       ),
                       validator: (v) => (v == null || v.trim().isEmpty)
-                          ? 'Matricule is required'
+                          ? l10n.loginMatriculeRequired
                           : null,
                     ),
                     const SizedBox(height: 16),
@@ -93,7 +96,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       textInputAction: TextInputAction.done,
                       onFieldSubmitted: (_) => _submit(),
                       decoration: InputDecoration(
-                        labelText: 'Password',
+                        labelText: l10n.loginPassword,
                         prefixIcon: const Icon(Icons.lock_outline),
                         border: const OutlineInputBorder(),
                         suffixIcon: IconButton(
@@ -106,7 +109,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         ),
                       ),
                       validator: (v) => (v == null || v.isEmpty)
-                          ? 'Password is required'
+                          ? l10n.loginPasswordRequired
                           : null,
                     ),
                     const SizedBox(height: 24),
@@ -120,7 +123,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 width: 20,
                                 child: CircularProgressIndicator(strokeWidth: 2),
                               )
-                            : const Text('Se connecter'),
+                            : Text(l10n.loginSubmit),
                       ),
                     ),
                   ],

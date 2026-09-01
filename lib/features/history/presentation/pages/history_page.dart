@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../l10n/app_localizations.dart';
+
 import '../../../../core/utils/date_format.dart';
 import '../../../questionnaire/presentation/pages/questionnaire_page.dart';
 import '../../../questionnaire/presentation/providers/response_providers.dart';
@@ -19,13 +21,13 @@ class HistoryPage extends ConsumerWidget {
     final titleById = {for (final s in surveys) s.remoteId: s.title};
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Historique')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).historyTitle)),
       body: responses.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => const Center(child: Text('Impossible de charger l’historique')),
+        error: (_, __) => Center(child: Text(AppLocalizations.of(context).historyLoadFailed)),
         data: (list) {
           if (list.isEmpty) {
-            return const Center(child: Text('Aucune réponse collectée.'));
+            return Center(child: Text(AppLocalizations.of(context).historyEmpty));
           }
           return ListView.separated(
             padding: const EdgeInsets.all(12),

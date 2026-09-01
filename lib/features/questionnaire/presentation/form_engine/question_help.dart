@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../l10n/app_localizations.dart';
+
 import '../../domain/entities/survey_question.dart';
 import 'localized_text.dart';
 
@@ -56,7 +58,7 @@ class _QuestionHelpSheetState extends ConsumerState<_QuestionHelpSheet> {
       if (mounted) setState(() => _aiText = text);
     } catch (_) {
       if (mounted) {
-        setState(() => _aiText = 'AI explanation is unavailable right now.');
+        setState(() => _aiText = AppLocalizations.of(context).helpAiUnavailable);
       }
     } finally {
       if (mounted) setState(() => _aiLoading = false);
@@ -102,7 +104,7 @@ class _QuestionHelpSheetState extends ConsumerState<_QuestionHelpSheet> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.auto_awesome),
-                label: const Text('Expliquer avec l’IA (en ligne)'),
+                label: Text(AppLocalizations.of(context).helpExplainWithAi),
               ),
               if (_aiText != null) ...[
                 const SizedBox(height: 12),

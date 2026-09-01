@@ -14,7 +14,7 @@ final surveyDefinitionProvider =
   final dao = ref.watch(appDatabaseProvider).surveysDao;
   final row = await dao.getSurvey(remoteId);
   if (row == null) {
-    throw const CacheFailure('Survey is not downloaded on this device');
+    throw const CacheFailure('Cette enquête n’est pas téléchargée sur cet appareil');
   }
   final json = jsonDecode(row.definitionJson) as Map<String, dynamic>;
   return SurveyDefinitionParser.parse(json);

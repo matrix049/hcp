@@ -37,6 +37,20 @@ class ResponsesDao extends DatabaseAccessor<AppDatabase>
             ..orderBy([(r) => OrderingTerm.asc(r.createdAt)]))
           .get();
 
+  /// Put any response stranded in `syncing` back into the queue.
+  ///
+  /// A response is flipped to `syncing` just before its upload starts. If the
+  /// app is killed at that instant the row keeps that status forever: it no
+  /// longer matches `getPendingResponses()` so it is never retried, yet it
+  /// still counts as unsynced in the badge. The sync engine calls this at the
+  /// start of every pass — its in-flight guard means nothing can legitimately
+  /// be `syncing` when a new pass begins.
+  Future<int> requeueStuckSyncing() {
+    return (update(surveyResponses)
+          ..where((r) => r.syncStatus.equalsValue(SyncStatus.syncing)))
+        .write(const SurveyResponsesCompanion(syncStatus: Value(SyncStatus.pending)));
+  }
+
   /// Live count of not-yet-synced work — drives the sync status badge.
   Stream<int> watchUnsyncedCount() {
     final count = surveyResponses.id.count();

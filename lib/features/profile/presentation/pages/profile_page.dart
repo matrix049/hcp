@@ -15,9 +15,9 @@ class ProfilePage extends ConsumerWidget {
     final agent = state is AuthAuthenticated ? state.agent : null;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
+      appBar: AppBar(title: const Text('Profil')),
       body: agent == null
-          ? const Center(child: Text('Not signed in'))
+          ? const Center(child: Text('Non connecté'))
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [
@@ -41,16 +41,16 @@ class ProfilePage extends ConsumerWidget {
                 ),
                 const SizedBox(height: 24),
                 _InfoTile(icon: Icons.badge_outlined, label: 'Matricule', value: agent.matricule),
-                _InfoTile(icon: Icons.work_outline, label: 'Role', value: agent.role),
-                _InfoTile(icon: Icons.map_outlined, label: 'Region', value: agent.region),
+                _InfoTile(icon: Icons.work_outline, label: 'Rôle', value: agent.role),
+                _InfoTile(icon: Icons.map_outlined, label: 'Région', value: agent.region),
                 if (agent.phone != null && agent.phone!.isNotEmpty)
-                  _InfoTile(icon: Icons.phone_outlined, label: 'Phone', value: agent.phone!),
+                  _InfoTile(icon: Icons.phone_outlined, label: 'Téléphone', value: agent.phone!),
                 const SizedBox(height: 24),
                 const _LanguageSelector(),
                 const SizedBox(height: 24),
                 FilledButton.tonalIcon(
                   icon: const Icon(Icons.logout),
-                  label: const Text('Sign out'),
+                  label: const Text('Déconnexion'),
                   onPressed: () async {
                     await ref.read(authControllerProvider.notifier).logout();
                     if (context.mounted) {

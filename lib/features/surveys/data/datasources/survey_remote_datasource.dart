@@ -17,7 +17,7 @@ class SurveyRemoteDataSource {
           .map((e) => SurveyModel.summaryFromJson(e as Map<String, dynamic>))
           .toList();
     } on DioException catch (e) {
-      throw ServerException('Failed to load surveys', e.response?.statusCode);
+      throw ServerException('Impossible de charger l’enquêtes', e.response?.statusCode);
     }
   }
 

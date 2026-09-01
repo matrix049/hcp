@@ -19,18 +19,18 @@ class SurveysPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Surveys'),
+        title: const Text('Enquêtes'),
         actions: [
           const SyncStatusIndicator(),
           IconButton(
-            tooltip: 'History',
+            tooltip: 'Historique',
             icon: const Icon(Icons.history),
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const HistoryPage()),
             ),
           ),
           IconButton(
-            tooltip: 'Profile',
+            tooltip: 'Profil',
             icon: const Icon(Icons.person_outline),
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const ProfilePage()),
@@ -85,11 +85,11 @@ class _OfflineFallback extends ConsumerWidget {
         MaterialBanner(
           backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
           leading: const Icon(Icons.cloud_off),
-          content: Text('Offline — showing downloaded surveys.\n$message'),
+          content: Text('Hors ligne — enquêtes téléchargées uniquement.\n$message'),
           actions: [
             TextButton(
               onPressed: () => ref.invalidate(availableSurveysProvider),
-              child: const Text('Retry'),
+              child: const Text('Réessayer'),
             ),
           ],
         ),
@@ -128,7 +128,7 @@ class _SurveyTileState extends ConsumerState<_SurveyTile> {
     result.fold(
       (f) => _snack(f.message),
       (_) {
-        _snack('Downloaded "${widget.survey.title}"');
+        _snack('Téléchargée "${widget.survey.title}"');
         // Refresh the "downloaded" flags on the available list.
         ref.invalidate(availableSurveysProvider);
       },
@@ -178,13 +178,13 @@ class _SurveyTileState extends ConsumerState<_SurveyTile> {
     if (s.isDownloaded) {
       return const Chip(
         avatar: Icon(Icons.check, size: 18),
-        label: Text('Downloaded'),
+        label: Text('Téléchargée'),
       );
     }
     return FilledButton.tonalIcon(
       onPressed: _download,
       icon: const Icon(Icons.download),
-      label: const Text('Download'),
+      label: const Text('Télécharger'),
     );
   }
 }

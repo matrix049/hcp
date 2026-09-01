@@ -37,12 +37,12 @@ class QuestionnairePage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(responseId == null ? 'New response' : 'Edit response'),
+        title: Text(responseId == null ? 'Nouvelle réponse' : 'Modifier la réponse'),
       ),
       body: definition.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (err, _) => Center(
-          child: Text(err is Failure ? err.message : 'Failed to load survey'),
+          child: Text(err is Failure ? err.message : 'Impossible de charger l’enquête'),
         ),
         data: (survey) => _QuestionnaireForm(
           survey: survey,
@@ -151,15 +151,15 @@ class _QuestionnaireFormState extends ConsumerState<_QuestionnaireForm> {
         if (!_isVisible(q)) continue;
         final value = _answers[q.id];
         if (q.required && _isEmpty(value)) {
-          errors[q.id] = 'This question is required';
+          errors[q.id] = 'Cette question est obligatoire';
           continue;
         }
         if (value is num && q.validation != null) {
           final v = q.validation!;
           if (v.min != null && value < v.min!) {
-            errors[q.id] = 'Minimum is ${v.min}';
+            errors[q.id] = 'Minimum : ${v.min}';
           } else if (v.max != null && value > v.max!) {
-            errors[q.id] = 'Maximum is ${v.max}';
+            errors[q.id] = 'Maximum : ${v.max}';
           }
         }
       }
@@ -176,7 +176,7 @@ class _QuestionnaireFormState extends ConsumerState<_QuestionnaireForm> {
     unawaited(ref.read(syncControllerProvider.notifier).syncNow());
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Response saved and marked ready to sync')),
+      const SnackBar(content: Text('Réponse enregistrée et mise en file d’envoi')),
     );
     Navigator.of(context).pop();
   }
@@ -185,7 +185,7 @@ class _QuestionnaireFormState extends ConsumerState<_QuestionnaireForm> {
     await _saveDraft();
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Draft saved')),
+      const SnackBar(content: Text('Brouillon enregistré')),
     );
   }
 
@@ -234,7 +234,7 @@ class _QuestionnaireFormState extends ConsumerState<_QuestionnaireForm> {
         FilledButton.tonalIcon(
           onPressed: () => setState(() => _readOnly = false),
           icon: const Icon(Icons.edit_outlined),
-          label: const Text('Make a correction'),
+          label: const Text('Corriger'),
         ),
       ];
     }
@@ -242,14 +242,14 @@ class _QuestionnaireFormState extends ConsumerState<_QuestionnaireForm> {
       OutlinedButton.icon(
         onPressed: _onSaveDraftPressed,
         icon: const Icon(Icons.save_outlined),
-        label: const Text('Save draft'),
+        label: const Text('Enregistrer le brouillon'),
       ),
       const SizedBox(height: 8),
       FilledButton(
         onPressed: _finalize,
         child: const Padding(
           padding: EdgeInsets.symmetric(vertical: 12),
-          child: Text('Validate & mark ready to sync'),
+          child: Text('Valider et mettre en file d’envoi'),
         ),
       ),
     ];
@@ -265,8 +265,8 @@ class _QuestionnaireFormState extends ConsumerState<_QuestionnaireForm> {
             SizedBox(width: 12),
             Expanded(
               child: Text(
-                'This response is already submitted to the server, so it is '
-                'read-only. Tap “Make a correction” to edit and re-sync it.',
+                'Cette réponse a déjà été envoyée au serveur, elle est donc '
+                'en lecture seule. Appuyez sur « Corriger » pour la modifier et la renvoyer.',
               ),
             ),
           ],

@@ -22,9 +22,17 @@ export const env = {
     accessExpires: process.env.JWT_ACCESS_EXPIRES ?? '1h',
     refreshExpires: process.env.JWT_REFRESH_EXPIRES ?? '30d',
   },
+  // Comma-separated list of allowed browser origins. Unset = open (dev only).
+  corsOrigins: process.env.CORS_ORIGINS ?? '',
+  rateLimit: {
+    windowMs: Number(process.env.LOGIN_WINDOW_MS ?? 60_000),
+    maxAttempts: Number(process.env.LOGIN_MAX_ATTEMPTS ?? 10),
+  },
   admin: {
-    email: process.env.ADMIN_EMAIL ?? 'hcp@admin.com',
-    password: process.env.ADMIN_PASSWORD ?? 'password123',
+    email: required('ADMIN_EMAIL'),
+    // No default: a hardcoded fallback password in source is a published
+    // credential. The server refuses to start without one configured.
+    password: required('ADMIN_PASSWORD'),
   },
   llm: {
     // Both optional: with neither key the generator falls back to the regex

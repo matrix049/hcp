@@ -102,7 +102,7 @@ class _QuestionHelpSheetState extends ConsumerState<_QuestionHelpSheet> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.auto_awesome),
-                label: const Text('Explain with AI (online)'),
+                label: const Text('Expliquer avec l’IA (en ligne)'),
               ),
               if (_aiText != null) ...[
                 const SizedBox(height: 12),

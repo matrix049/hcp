@@ -20,14 +20,25 @@ class ResponseRepositoryImpl implements ResponseRepository {
   }
 
   @override
-  Future<void> saveDraft(SurveyResponse response) {
-    return _dao.upsertResponse(
+  Future<void> saveDraft(SurveyResponse response) async {
+    // Auto-save must never change the sync status of an existing response.
+    //
+    // Forcing `draft` here silently pulled a finalised response back out of the
+    // upload queue: an agent who validated a response offline, reopened it and
+    // touched a single field would have seen it quietly stop being sent. The
+    // status is only set when the row is created; afterwards `finalizeResponse`
+    // is the one place that promotes it to `pending`.
+    final existing = await _dao.getById(response.id);
+
+    await _dao.upsertResponse(
       SurveyResponsesCompanion(
         id: Value(response.id),
         surveyRemoteId: Value(response.surveyRemoteId),
         agentId: Value(response.agentId),
         answersJson: Value(jsonEncode(response.answers)),
-        syncStatus: const Value(SyncStatus.draft),
+        syncStatus: existing == null
+            ? const Value(SyncStatus.draft)
+            : const Value.absent(),
         updatedAt: Value(DateTime.now()),
       ),
     );

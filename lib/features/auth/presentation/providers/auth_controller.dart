@@ -16,7 +16,7 @@ class AuthController extends Notifier<AuthState> {
     ref.listen(sessionExpiredProvider, (previous, next) {
       if ((previous ?? 0) < next) {
         state = const AuthUnauthenticated(
-          message: 'Your session has expired. Please sign in again.',
+          message: 'Votre session a expiré. Veuillez vous reconnecter.',
         );
       }
     });

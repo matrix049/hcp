@@ -39,15 +39,15 @@ class SurveyResponsesPage extends ConsumerWidget {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _openResponse(context),
         icon: const Icon(Icons.add),
-        label: const Text('New response'),
+        label: const Text('Nouvelle réponse'),
       ),
       body: responses.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => const Center(child: Text('Could not load responses')),
+        error: (_, __) => const Center(child: Text('Impossible de charger les réponses')),
         data: (list) {
           if (list.isEmpty) {
             return const Center(
-              child: Text('No responses yet.\nTap “New response” to start.',
+              child: Text('Aucune réponse pour le moment.\nAppuyez sur « Nouvelle réponse » pour commencer.',
                   textAlign: TextAlign.center),
             );
           }
@@ -77,8 +77,8 @@ class _ResponseTile extends StatelessWidget {
     return Card(
       child: ListTile(
         leading: const Icon(Icons.description_outlined),
-        title: Text('Response #${response.shortId}'),
-        subtitle: Text('Updated ${formatShortDateTime(response.updatedAt)}'),
+        title: Text('Réponse n°${response.shortId}'),
+        subtitle: Text('Modifiée le ${formatShortDateTime(response.updatedAt)}'),
         trailing: SyncStatusChip(status: response.status),
         onTap: onTap,
       ),

@@ -52,7 +52,7 @@ class AuthRepositoryImpl implements AuthRepository {
     // Offline path.
     if (!hasLocal) {
       return const Left(
-        NetworkFailure('First login requires an internet connection.'),
+        NetworkFailure('La première connexion nécessite Internet.'),
       );
     }
     return _offlineLogin(matricule, password);
@@ -67,7 +67,7 @@ class AuthRepositoryImpl implements AuthRepository {
       password: password,
     );
     if (!valid) {
-      return const Left(AuthFailure('Invalid matricule or password.'));
+      return const Left(AuthFailure('Matricule ou mot de passe incorrect.'));
     }
     final user = await local.getStoredUser();
     if (user == null) return const Left(CacheFailure());

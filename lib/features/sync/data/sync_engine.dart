@@ -35,6 +35,10 @@ class SyncEngine {
     try {
       if (!await _connectivity.isConnected) return const SyncResult();
 
+      // Recover anything a previous run left mid-upload before reading the
+      // queue, otherwise those responses are invisible to this pass too.
+      await _dao.requeueStuckSyncing();
+
       final pending = await _dao.getPendingResponses();
       for (final row in pending) {
         await _dao.updateSyncStatus(row.id, SyncStatus.syncing);

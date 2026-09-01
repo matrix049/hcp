@@ -120,7 +120,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 width: 20,
                                 child: CircularProgressIndicator(strokeWidth: 2),
                               )
-                            : const Text('Sign in'),
+                            : const Text('Se connecter'),
                       ),
                     ),
                   ],

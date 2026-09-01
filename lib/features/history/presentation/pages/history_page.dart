@@ -19,13 +19,13 @@ class HistoryPage extends ConsumerWidget {
     final titleById = {for (final s in surveys) s.remoteId: s.title};
 
     return Scaffold(
-      appBar: AppBar(title: const Text('History')),
+      appBar: AppBar(title: const Text('Historique')),
       body: responses.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (_, __) => const Center(child: Text('Could not load history')),
+        error: (_, __) => const Center(child: Text('Impossible de charger l’historique')),
         data: (list) {
           if (list.isEmpty) {
-            return const Center(child: Text('No responses collected yet.'));
+            return const Center(child: Text('Aucune réponse collectée.'));
           }
           return ListView.separated(
             padding: const EdgeInsets.all(12),

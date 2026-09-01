@@ -48,6 +48,6 @@ void main() {
 
     expect(find.byType(MaterialApp), findsOneWidget);
     expect(find.byType(LoginPage), findsOneWidget);
-    expect(find.text('Sign in'), findsOneWidget);
+    expect(find.text('Se connecter'), findsOneWidget);
   });
 }

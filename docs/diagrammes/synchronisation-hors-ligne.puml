@@ -1,0 +1,83 @@
+@startuml
+' ═══════════════════════════════════════════════════════════════
+'  Le parcours d'une réponse, du doigt de l'enquêteur à PostgreSQL
+'  À coller sur https://www.plantuml.com/plantuml/uml
+' ═══════════════════════════════════════════════════════════════
+
+title Parcours d'une réponse — architecture hors-ligne d'abord
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName Segoe UI
+skinparam defaultFontSize 12
+skinparam sequence {
+  ArrowColor #5A6B64
+  LifeLineBorderColor #C8D4CF
+  ParticipantBorderColor #0B6E4F
+  ParticipantBackgroundColor #E8F2EE
+  ActorBorderColor #0B6E4F
+  ActorBackgroundColor #E8F2EE
+  BoxBorderColor #C8D4CF
+}
+
+actor "Enquêteur" as A
+
+box "Téléphone — fonctionne sans réseau" #FDFCF8
+  participant "Écran\nQuestionnaire" as UI
+  participant "Riverpod\n(état)" as RP
+  participant "Repository" as REPO
+  database "SQLite\n(Drift)" as DB
+  participant "Moteur de\nsynchronisation" as SYNC
+end box
+
+box "Serveur HCP" #F4F8F6
+  participant "API REST\nExpress" as API
+  database "PostgreSQL" as PG
+end box
+
+== Zone rurale : aucun réseau ==
+
+A -> UI : répond à une question
+UI -> RP : onChanged(valeur)
+RP -> REPO : saveDraft()
+REPO -> DB : upsert, statut **draft**
+note over DB #FDF6E3
+  La donnée est **en sécurité ici**.
+  Aucun appel réseau n'a eu lieu.
+  L'écran ne parle jamais au serveur.
+end note
+DB --> UI : le flux met l'écran à jour
+
+A -> UI : valide la réponse
+UI -> REPO : finalizeResponse()
+REPO -> DB : statut **draft → pending**
+note over DB : « pending » = en file d'attente d'envoi
+
+== L'enquêteur retrouve du réseau ==
+
+SYNC -> DB : SELECT * WHERE statut = pending
+DB --> SYNC : 3 réponses
+loop pour chaque réponse
+  SYNC -> DB : statut **pending → syncing**
+  SYNC -> API : POST /api/responses\n{ id (UUID du téléphone), answers }
+  API -> API : vérifie le jeton JWT\net l'identité de l'enquêteur
+  API -> PG : INSERT ... **ON CONFLICT (id) DO UPDATE**
+  note right of PG #FDF6E3
+    L'identifiant vient du **téléphone**.
+    Renvoyer deux fois la même réponse
+    met à jour la ligne au lieu d'en créer
+    une seconde : aucun doublon possible.
+  end note
+  PG --> API : id enregistré
+  API --> SYNC : { status: "synced" }
+  SYNC -> DB : statut **syncing → synced**
+end
+
+alt L'envoi échoue (réseau coupé)
+  SYNC -> DB : attempts + 1, retour à **pending**
+  note over SYNC : nouvelle tentative plus tard,\njusqu'à 5 essais puis **failed**
+end
+
+DB --> UI : le badge « non synchronisé » se met à jour tout seul
+
+@enduml

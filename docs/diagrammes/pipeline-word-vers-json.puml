@@ -1,0 +1,93 @@
+@startuml
+' ═══════════════════════════════════════════════════════════════
+'  Comment un document Word devient une enquête utilisable
+'  À coller sur https://www.plantuml.com/plantuml/uml
+' ═══════════════════════════════════════════════════════════════
+
+title Du document Word au questionnaire publié
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName Segoe UI
+skinparam defaultFontSize 12
+skinparam ArrowColor #5A6B64
+skinparam activity {
+  BorderColor #0B6E4F
+  BackgroundColor #FFFFFF
+  DiamondBorderColor #B8860B
+  DiamondBackgroundColor #FDF6E3
+}
+
+start
+
+:L'administrateur dépose
+un fichier **.docx** ou **.txt**;
+note right
+  Limite : 5 Mo
+  Traité en mémoire, jamais écrit sur disque
+end note
+
+:**Extraction du texte**
+bibliothèque mammoth — aucune IA;
+note right
+  On lit aussi la //structure// du .docx :
+  les titres et les sections sont retirés,
+  seules les vraies questions sont gardées
+end note
+
+:Découpage en **lots de 25 questions**;
+note right
+  Sur 100 questions envoyées d'un bloc,
+  le modèle en avait fusionné 90.
+  Les lots rendent le nombre vérifiable.
+end note
+
+repeat :Pour chaque lot;
+
+  if (Clé Claude configurée ?) then (oui)
+    :**Claude**
+    (qualité maximale);
+  elseif (Clé Google configurée ?) then (oui)
+    :**Gemini**
+    rotation sur 3 modèles;
+  else (aucune clé)
+    :**Règles par mots-clés**
+    //pas une IA// : de simples motifs
+    ("combien" → nombre, "(Oui / Non)" → choix);
+  endif
+
+  if (Le lot rend-il\nexactement 25 questions ?) then (non)
+    :Nouvelle tentative;
+  else (oui)
+  endif
+
+repeat while (Reste-t-il un lot ?) is (oui) not (non)
+
+:**Validation du JSON**
+type inconnu → texte,
+choix sans options → texte,
+options en double supprimées;
+note right
+  Chaque réparation est **affichée**
+  à l'administrateur, jamais silencieuse
+end note
+
+:**Aperçu à l'écran**
+rien n'est encore enregistré;
+
+if (L'administrateur valide ?) then (il corrige)
+  :Modification à la main
+  ou nouvelle consigne à l'IA;
+  detach
+else (il publie)
+endif
+
+:**Enregistrement en PostgreSQL**
+colonne JSONB;
+
+:L'enquête apparaît dans
+l'application des enquêteurs;
+
+stop
+
+@enduml

@@ -12,9 +12,6 @@
 .swiftpm/
 migrate_working_dir/
 
-# Editor / tooling
-.claude/
-
 # IntelliJ related
 *.iml
 *.ipr

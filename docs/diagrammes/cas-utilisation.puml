@@ -1,0 +1,113 @@
+@startuml
+' ═══════════════════════════════════════════════════════════════
+'  DIAGRAMME DE CAS D'UTILISATION
+'  Application de collecte d'enquêtes — HCP, Direction de la Statistique
+'
+'  Pour obtenir l'image : coller ce fichier sur
+'  https://www.plantuml.com/plantuml/uml   puis PNG ou SVG.
+' ═══════════════════════════════════════════════════════════════
+
+title Application de collecte d'enquêtes HCP\nDiagramme de cas d'utilisation
+
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName Segoe UI
+skinparam defaultFontSize 13
+skinparam ArrowColor #5A6B64
+
+skinparam actor {
+  BorderColor #0B6E4F
+  BackgroundColor #E8F2EE
+}
+skinparam usecase {
+  BorderColor #0B6E4F
+  BackgroundColor #FFFFFF
+  BorderColor<<horsligne>> #B8860B
+  BackgroundColor<<horsligne>> #FDF6E3
+  BorderColor<<ia>> #4C6072
+  BackgroundColor<<ia>> #EEF2F6
+}
+
+left to right direction
+
+' ─────────── Acteurs principaux (des personnes) ───────────
+actor "Administrateur" as ADMIN
+actor "Enquêteur" as AGENT
+
+' ─────────── Acteurs secondaires (des systèmes) ───────────
+actor "Service d'IA\nGemini / Claude" as LLM
+actor "Serveur HCP\nAPI + PostgreSQL" as SERVER
+
+rectangle "Système de collecte d'enquêtes" {
+
+  ' ═══ Espace d'administration ═══
+  usecase "Importer un document\nWord ou texte" as UC_IMPORT
+  usecase "Convertir en\nquestionnaire" as UC_CONVERT <<ia>>
+  usecase "Relire et corriger\nl'aperçu" as UC_REVIEW
+  usecase "Demander une\ncorrection à l'IA" as UC_ASKAI <<ia>>
+  usecase "Publier l'enquête" as UC_PUBLISH
+  usecase "Activer ou masquer\nune enquête" as UC_TOGGLE
+  usecase "Gérer les enquêteurs" as UC_AGENTS
+  usecase "Consulter le\ntableau de bord" as UC_DASH
+  usecase "Exporter les réponses\nen CSV" as UC_EXPORT
+
+  ' ═══ Application de l'enquêteur ═══
+  usecase "Se connecter" as UC_LOGIN
+  usecase "Télécharger\nune enquête" as UC_DOWNLOAD
+  usecase "Remplir un\nquestionnaire" as UC_FILL <<horsligne>>
+  usecase "Enregistrer\nun brouillon" as UC_DRAFT <<horsligne>>
+  usecase "Consulter l'aide\nd'une question" as UC_HELP <<horsligne>>
+  usecase "Valider une réponse" as UC_FINAL <<horsligne>>
+  usecase "Consulter\nl'historique" as UC_HIST <<horsligne>>
+  usecase "Corriger une réponse\ndéjà envoyée" as UC_CORRECT <<horsligne>>
+  usecase "Changer la langue\nfrançais / arabe" as UC_LANG <<horsligne>>
+  usecase "Synchroniser\nles réponses" as UC_SYNC
+}
+
+' ─────────── Ce que fait l'administrateur ───────────
+ADMIN --> UC_IMPORT
+ADMIN --> UC_REVIEW
+ADMIN --> UC_PUBLISH
+ADMIN --> UC_TOGGLE
+ADMIN --> UC_AGENTS
+ADMIN --> UC_DASH
+ADMIN --> UC_EXPORT
+
+UC_IMPORT ..> UC_CONVERT : include
+UC_PUBLISH ..> UC_REVIEW : include
+UC_REVIEW <.. UC_ASKAI : extend
+
+' ─────────── Ce que fait l'enquêteur ───────────
+AGENT --> UC_LOGIN
+AGENT --> UC_DOWNLOAD
+AGENT --> UC_FILL
+AGENT --> UC_HIST
+AGENT --> UC_SYNC
+AGENT --> UC_LANG
+
+UC_FILL ..> UC_DRAFT : include
+UC_FILL ..> UC_FINAL : include
+UC_FILL <.. UC_HELP : extend
+UC_HIST <.. UC_CORRECT : extend
+UC_SYNC <.. UC_FINAL : extend
+
+' ─────────── Ce que le système appelle à l'extérieur ───────────
+UC_CONVERT --> LLM
+UC_ASKAI --> LLM
+
+UC_PUBLISH --> SERVER
+UC_DASH --> SERVER
+UC_EXPORT --> SERVER
+UC_AGENTS --> SERVER
+UC_LOGIN --> SERVER
+UC_DOWNLOAD --> SERVER
+UC_SYNC --> SERVER
+
+legend bottom
+|= |= Signification |
+|<#FDF6E3>  | Fonctionne **hors ligne**, sans aucune connexion |
+|<#EEF2F6>  | Nécessite le service d'IA (administrateur uniquement) |
+|<#FFFFFF>  | Nécessite le serveur HCP |
+endlegend
+
+@enduml

@@ -235,9 +235,15 @@
             <h2>1 · Importer &amp; générer</h2>
             <label for="title">Titre de l'enquête</label>
             <input id="title" type="text" placeholder="Ex : Enquête sur les ménages 2026" />
-            <label for="file">Fichier de questions (.docx / .txt)</label>
+            <label for="file">Fichier de questions</label>
             <input id="file" type="file" accept=".docx,.txt,.md,.csv" />
-            <small class="hint">Une question par ligne. « 1. », « Q1: » sont retirés automatiquement.</small>
+            <small class="hint">
+              Formats acceptés : <b>.docx</b>, <b>.txt</b>, <b>.md</b>, <b>.csv</b> ·
+              taille maximale <b>5 Mo</b>.<br>
+              Une question par ligne. Les numérotations « 1. » et « Q1: » sont retirées
+              automatiquement, ainsi que les titres et les intitulés de section.
+            </small>
+            <div id="fileInfo" class="status"></div>
             <br><button id="genBtn" class="act">Générer l'enquête</button>
             <div id="genStatus" class="status"></div>
             <div id="progress">
@@ -530,9 +536,30 @@
 
     // Rough expectation read from the file itself, so the bar is meaningful
     // from the first question instead of jumping around.
+    const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
+
     $('file').addEventListener('change', async () => {
       estimatedQuestions = 0;
       const f = $('file').files[0];
+
+      // Refuse an oversized file here rather than after a pointless upload.
+      if (f && f.size > MAX_UPLOAD_BYTES) {
+        const mb = (f.size / 1024 / 1024).toFixed(1);
+        setStatus('fileInfo', `x Fichier trop volumineux (${mb} Mo). Maximum : 5 Mo.`, 'err');
+        $('file').value = '';
+        $('genBtn').disabled = true;
+        return;
+      }
+      $('genBtn').disabled = false;
+      if (f) {
+        const kb = f.size < 1024 * 1024
+          ? `${(f.size / 1024).toFixed(0)} Ko`
+          : `${(f.size / 1024 / 1024).toFixed(1)} Mo`;
+        setStatus('fileInfo', `\u2713 ${f.name} · ${kb}`, 'ok');
+      } else {
+        setStatus('fileInfo', '', '');
+      }
+
       if (f && /\.(txt|md|csv)$/i.test(f.name)) {
         const t = await f.text();
         estimatedQuestions = t.split(/\r?\n/).filter((l) => l.trim().length > 3).length;

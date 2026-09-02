@@ -21,10 +21,18 @@ import {
   updateAgentController,
 } from './admin.controller.js';
 
-// In-memory upload (files are small question lists; parsed immediately).
+/**
+ * Largest questionnaire the admin tool accepts, in bytes.
+ *
+ * Questionnaires are text: even a 200-question document sits far under this.
+ * The cap exists so a mistaken upload (a scan, a video) cannot allocate
+ * unbounded memory - files are held in RAM, never written to disk.
+ */
+export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024;
+
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB
+  limits: { fileSize: MAX_UPLOAD_BYTES },
 });
 
 const router = Router();

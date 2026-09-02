@@ -35,9 +35,8 @@ export const env = {
     password: required('ADMIN_PASSWORD'),
   },
   llm: {
-    // Both optional: with neither key the generator falls back to the regex
+    // Optional: without a key the generator falls back to the keyword
     // heuristic, so the admin tool degrades instead of failing.
-    anthropicApiKey: process.env.ANTHROPIC_API_KEY ?? '',
     googleApiKey: process.env.GOOGLE_API_KEY ?? '',
     enabled: process.env.LLM_ENABLED !== 'false',
     timeoutMs: Number(process.env.LLM_TIMEOUT_MS ?? 120000),

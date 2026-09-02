@@ -1,8 +1,8 @@
 import { RENDERED_TYPES } from './schema.js';
 
 /**
- * Prompts are shared by every provider so a switch from Gemini to Claude
- * changes the engine, not the instructions.
+ * Prompts live here, not in the provider, so adding a second engine later
+ * changes the caller, not the instructions.
  */
 
 export const SYSTEM_PROMPT = `Tu es un convertisseur strict. Tu transformes une liste de questions d'enquete (Haut-Commissariat au Plan, Maroc) en JSON structure pour une application mobile d'enqueteurs.

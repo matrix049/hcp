@@ -44,16 +44,14 @@ end note
 
 repeat :Pour chaque lot;
 
-  if (Clé Claude configurée ?) then (oui)
-    :**Claude**
-    (qualité maximale);
-  elseif (Clé Google configurée ?) then (oui)
+  if (Clé Google configurée et service disponible ?) then (oui)
     :**Gemini**
-    rotation sur 3 modèles;
-  else (aucune clé)
+    rotation sur 3 modèles
+    si l'un est saturé;
+  else (non)
     :**Règles par mots-clés**
     //pas une IA// : de simples motifs
-    ("combien" → nombre, "(Oui / Non)" → choix);
+    ("combien" → nombre, "(Oui / Non)" → choix unique);
   endif
 
   if (Le lot rend-il\nexactement 25 questions ?) then (non)

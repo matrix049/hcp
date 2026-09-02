@@ -32,6 +32,18 @@ export function errorHandler(err, req, res, next) {
     return res.status(413).json({ error: 'Requête trop volumineuse.' });
   }
 
+  // multer rejects an oversized upload with its own error code. Without this
+  // the admin would see "Internal server error" for a file that is simply too
+  // big - which reads as a crash rather than as the rule the UI announced.
+  if (err?.code === 'LIMIT_FILE_SIZE') {
+    return res.status(413).json({
+      error: 'Fichier trop volumineux : la taille maximale est de 5 Mo.',
+    });
+  }
+  if (err?.code === 'LIMIT_UNEXPECTED_FILE') {
+    return res.status(400).json({ error: 'Champ de fichier inattendu.' });
+  }
+
   console.error('Unhandled error:', err);
   return res.status(500).json({ error: 'Internal server error' });
 }

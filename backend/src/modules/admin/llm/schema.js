@@ -1,10 +1,10 @@
 /**
  * The single output contract every LLM provider must satisfy.
  *
- * Gemini and Claude produce different quality, but never a different SHAPE:
- * both are held to this schema, and `normalizeSurvey()` repairs whatever slips
- * through. The Flutter app can therefore never receive a malformed survey,
- * whichever engine (or the heuristic) produced it.
+ * Whichever engine answers, the SHAPE is identical: the model is held to this
+ * schema, and `normalizeSurvey()` repairs whatever slips through. The Flutter
+ * app can therefore never receive a malformed survey, whether it came from the
+ * model or from the keyword heuristic.
  */
 
 /** The only question types the Flutter app actually renders today. */

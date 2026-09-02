@@ -1,23 +1,25 @@
 import { env } from '../../../config/env.js';
 import { LlmError } from './errors.js';
 import { gemini } from './providers/gemini.js';
-import { claude } from './providers/claude.js';
 import { SYSTEM_PROMPT, buildGenerateUserPrompt, buildFixUserPrompt } from './prompt.js';
 import { normalizeSurvey } from './schema.js';
 
 /**
  * The provider ladder.
  *
- * Tier 1 Claude  — premium, active as soon as ANTHROPIC_API_KEY exists.
- * Tier 2 Gemini  — free tier, the current primary.
- * Tier 3 heuristic — the caller's regex fallback; never removed, so the tool
- *                    degrades instead of failing when no key works.
+ * Tier 1  Gemini — Google AI Studio, free tier. The engine that answers today.
+ * Tier 2  the caller's keyword heuristic — not an AI at all, just pattern
+ *         rules. Never removed: it is what answers when no key works, so the
+ *         tool degrades in quality instead of failing outright.
+ *
+ * The list is what makes a second provider a one-file change: an adapter only
+ * has to expose `name`, `available` and `generate({system, user, onProgress})`.
  *
  * A provider is skipped when it has no key. A provider that FAILS cascades to
  * the next one, except on `bad_request`: that means our own payload is wrong
  * and must surface rather than hide behind a working fallback.
  */
-const LADDER = [claude, gemini];
+const LADDER = [gemini];
 
 /** Which engines could run right now — surfaced on the admin review screen. */
 export function llmStatus() {

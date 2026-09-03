@@ -35,7 +35,7 @@ actor "Administrateur" as ADMIN
 actor "Enquêteur" as AGENT
 
 ' ─────────── Acteurs secondaires (des systèmes) ───────────
-actor "Service d'IA\nGemini / Claude" as LLM
+actor "Service d'IA\nGoogle Gemini" as LLM
 actor "Serveur HCP\nAPI + PostgreSQL" as SERVER
 
 rectangle "Système de collecte d'enquêtes" {

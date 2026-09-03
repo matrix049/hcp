@@ -46,8 +46,9 @@ repeat :Pour chaque lot;
 
   if (Clé Google configurée et service disponible ?) then (oui)
     :**Gemini**
-    rotation sur 3 modèles
-    si l'un est saturé;
+    rotation sur 5 modèles :
+    on passe au suivant dès
+    qu'un modèle est saturé;
   else (non)
     :**Règles par mots-clés**
     //pas une IA// : de simples motifs
